@@ -30,7 +30,8 @@ class MessageBuilder:
         📰 最新AI記事
         ・{記事タイトル1}
           → {URL1}
-        ・{記事タイトル2}
+        ・{記事タイトル2}（🇺🇸 英語）
+          📝 {概要}
           → {URL2}
         ```
 
@@ -63,7 +64,14 @@ class MessageBuilder:
         if articles:
             lines.append("📰 最新AI記事")
             for article in articles:
-                lines.append(f"・{article.title}")
+                # 英語記事の場合はマーク付き
+                if article.lang == "en":
+                    lines.append(f"・{article.title}（🇺🇸 英語）")
+                    # 概要があれば表示
+                    if article.description:
+                        lines.append(f"  📝 {article.description}")
+                else:
+                    lines.append(f"・{article.title}")
                 lines.append(f"  → {article.url}")
             lines.append("")
         else:

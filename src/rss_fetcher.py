@@ -3,7 +3,9 @@ RSS/Atomフィード取得
 複数フィードから最新記事を取得してマージ
 """
 
+import html
 import logging
+import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -23,6 +25,8 @@ class Article:
     url: str
     published: str
     source: str
+    lang: str = "ja"  # 言語（ja/en）
+    description: str = ""  # 記事の概要
 
 
 class RSSFetcher:
@@ -53,7 +57,7 @@ class RSSFetcher:
         2. commonカテゴリのフィードも追加
         3. 各フィードをパース（エラーはスキップ）
         4. 全記事をマージして日付でソート
-        5. 上位limit件を返す
+        5. 日本語記事を優先して上位limit件を返す
 
         Args:
             category: 記事カテゴリ
@@ -82,25 +86,28 @@ class RSSFetcher:
         for feed_info in all_feeds:
             url = feed_info.get("url")
             source = feed_info.get("name", "Unknown")
+            lang = feed_info.get("lang", "ja")
 
             try:
-                feed_articles = self._parse_feed(url, source, max_age_days)
+                feed_articles = self._parse_feed(url, source, max_age_days, lang)
                 articles.extend(feed_articles)
                 logger.info(f"Fetched {len(feed_articles)} articles from {source}")
             except Exception as e:
                 logger.warning(f"Failed to fetch feed {source}: {e}")
                 continue
 
-        # 日付でソート（新しい順）
+        # 日本語記事を優先、その後日付でソート
         articles = sorted(
             articles,
-            key=lambda x: self._parse_date(x.published),
-            reverse=True
+            key=lambda x: (
+                0 if x.lang == "ja" else 1,  # 日本語優先
+                -self._parse_date(x.published).timestamp()  # 新しい順
+            )
         )
 
         return articles[:limit]
 
-    def _parse_feed(self, url: str, source: str, max_age_days: int) -> list[Article]:
+    def _parse_feed(self, url: str, source: str, max_age_days: int, lang: str) -> list[Article]:
         """
         単一フィードをパース
 
@@ -108,6 +115,7 @@ class RSSFetcher:
             url: フィードURL
             source: フィード名
             max_age_days: 記事の最大日数
+            lang: 言語コード
 
         Returns:
             記事のリスト
@@ -138,11 +146,16 @@ class RSSFetcher:
                     if article_date < cutoff_date:
                         continue  # 古すぎる記事はスキップ
 
+                # 概要の取得（HTMLタグを除去）
+                description = self._extract_description(entry)
+
                 article = Article(
                     title=title,
                     url=link,
                     published=published,
-                    source=source
+                    source=source,
+                    lang=lang,
+                    description=description
                 )
                 articles.append(article)
 
@@ -151,6 +164,40 @@ class RSSFetcher:
                 continue
 
         return articles
+
+    def _extract_description(self, entry: dict) -> str:
+        """
+        記事の概要を抽出（HTMLタグを除去し、最初の150文字程度を返す）
+
+        Args:
+            entry: feedparserのエントリ
+
+        Returns:
+            概要テキスト
+        """
+        # summary > description > content の順で取得
+        raw_desc = entry.get("summary", entry.get("description", ""))
+
+        if not raw_desc and "content" in entry:
+            contents = entry.get("content", [])
+            if contents and isinstance(contents, list):
+                raw_desc = contents[0].get("value", "")
+
+        if not raw_desc:
+            return ""
+
+        # HTMLタグを除去
+        text = re.sub(r'<[^>]+>', '', raw_desc)
+        # HTMLエンティティをデコード
+        text = html.unescape(text)
+        # 余分な空白を整理
+        text = re.sub(r'\s+', ' ', text).strip()
+
+        # 150文字程度に切り詰め
+        if len(text) > 150:
+            text = text[:147] + "..."
+
+        return text
 
     def _parse_date(self, date_str: str) -> datetime:
         """

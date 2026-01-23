@@ -1,55 +1,125 @@
 # RSS/Atomフィード設定
 # カテゴリ別に購読するフィードを定義
+# 日本語フィードを優先（priority小=高優先）
 
 feeds:
   engineer:
-    - name: OpenAI Blog
-      url: https://openai.com/blog/rss.xml
-      priority: 1
-
-    - name: Anthropic News
-      url: https://www.anthropic.com/rss.xml
-      priority: 1
-
+    # 日本語フィード（優先）
     - name: Zenn AI Topics
       url: https://zenn.dev/topics/ai/feed
-      priority: 2
+      priority: 1
+      lang: ja
 
     - name: Zenn ChatGPT Topics
       url: https://zenn.dev/topics/chatgpt/feed
-      priority: 2
+      priority: 1
+      lang: ja
 
-    - name: Hugging Face Blog
-      url: https://huggingface.co/blog/feed.xml
+    - name: Qiita AI
+      url: https://qiita.com/tags/ai/feed
+      priority: 1
+      lang: ja
+
+    - name: Qiita ChatGPT
+      url: https://qiita.com/tags/chatgpt/feed
+      priority: 1
+      lang: ja
+
+    - name: Publickey
+      url: https://www.publickey1.jp/atom.xml
       priority: 2
+      lang: ja
+
+    - name: Gigazine AI
+      url: https://gigazine.net/news/rss_atom/
+      priority: 2
+      lang: ja
+
+    # 英語フィード（補足）
+    - name: OpenAI Blog
+      url: https://openai.com/blog/rss.xml
+      priority: 5
+      lang: en
+
+    - name: Anthropic News
+      url: https://www.anthropic.com/rss.xml
+      priority: 5
+      lang: en
 
   consultant:
+    # 日本語フィード（優先）
+    - name: ITmedia ビジネス
+      url: https://rss.itmedia.co.jp/rss/2.0/bizid.xml
+      priority: 1
+      lang: ja
+
+    - name: ITmedia エンタープライズ
+      url: https://rss.itmedia.co.jp/rss/2.0/enterprise.xml
+      priority: 1
+      lang: ja
+
+    - name: ZDNET Japan
+      url: https://japan.zdnet.com/rss/index.rdf
+      priority: 2
+      lang: ja
+
+    # 英語フィード（補足）
     - name: MIT Sloan AI
       url: https://sloanreview.mit.edu/tag/artificial-intelligence/feed/
-      priority: 1
+      priority: 5
+      lang: en
 
     - name: McKinsey Insights
       url: https://www.mckinsey.com/insights/rss
-      priority: 2
+      priority: 5
+      lang: en
 
   backoffice:
+    # 日本語フィード（優先）
+    - name: ITmedia PC USER
+      url: https://rss.itmedia.co.jp/rss/2.0/pcuser.xml
+      priority: 1
+      lang: ja
+
+    - name: Impress Watch
+      url: https://www.watch.impress.co.jp/data/rss/1.0/ipw/feed.rdf
+      priority: 1
+      lang: ja
+
+    - name: CNET Japan
+      url: https://japan.cnet.com/rss/index.rdf
+      priority: 2
+      lang: ja
+
+    # 英語フィード（補足）
     - name: Google Workspace Updates
       url: https://workspaceupdates.googleblog.com/atom.xml
-      priority: 1
+      priority: 5
+      lang: en
 
     - name: Microsoft 365 Blog
       url: https://www.microsoft.com/en-us/microsoft-365/blog/feed/
-      priority: 2
+      priority: 5
+      lang: en
 
 # 全カテゴリ共通（補足用）
   common:
+    # 日本語フィード（優先）
+    - name: ITmedia AI+
+      url: https://rss.itmedia.co.jp/rss/2.0/aiplus.xml
+      priority: 2
+      lang: ja
+
+    # 英語フィード（補足）
     - name: The Verge AI
       url: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
-      priority: 3
+      priority: 6
+      lang: en
 
     - name: TechCrunch AI
       url: https://techcrunch.com/category/artificial-intelligence/feed/
-      priority: 3
+      priority: 6
+      lang: en
 
 settings:
   # 1投稿あたりの最大記事数
