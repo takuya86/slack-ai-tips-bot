@@ -5,7 +5,7 @@ RSS/Atomフィード取得
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -122,7 +122,7 @@ class RSSFetcher:
             logger.warning(f"Feed parse warning for {source}: {feed.bozo_exception}")
 
         articles = []
-        cutoff_date = datetime.now() - timedelta(days=max_age_days)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=max_age_days)
 
         for entry in feed.entries[:10]:  # 最新10件のみチェック
             try:
@@ -154,25 +154,32 @@ class RSSFetcher:
 
     def _parse_date(self, date_str: str) -> datetime:
         """
-        日付文字列をdatetimeに変換
+        日付文字列をdatetimeに変換（UTC aware）
 
         Args:
             date_str: 日付文字列（RFC 2822 or ISO 8601形式）
 
         Returns:
-            datetime オブジェクト
+            datetime オブジェクト（timezone aware）
         """
         if not date_str:
-            return datetime.min
+            return datetime.min.replace(tzinfo=timezone.utc)
 
         try:
             # feedparserのtime.struct_timeからdatetimeに変換
             from email.utils import parsedate_to_datetime
-            return parsedate_to_datetime(date_str)
+            dt = parsedate_to_datetime(date_str)
+            # タイムゾーンがない場合はUTCを設定
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
         except Exception:
             try:
                 # ISO 8601形式を試す
-                return datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt
             except Exception:
                 logger.warning(f"Failed to parse date: {date_str}")
-                return datetime.min
+                return datetime.min.replace(tzinfo=timezone.utc)
