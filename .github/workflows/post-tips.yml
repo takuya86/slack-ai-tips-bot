@@ -1,0 +1,40 @@
+name: Post AI Tips to Slack
+
+on:
+  schedule:
+    # 毎日12:00 JST (03:00 UTC)
+    - cron: '0 3 * * *'
+    # 毎日19:00 JST (10:00 UTC)
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    inputs:
+      category:
+        description: 'カテゴリ指定（空欄でランダム）'
+        required: false
+        type: choice
+        options:
+          - ''
+          - engineer
+          - consultant
+          - backoffice
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Post tips
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          CATEGORY: ${{ github.event.inputs.category }}
+        run: python src/main.py
