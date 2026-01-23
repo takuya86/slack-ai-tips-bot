@@ -1,0 +1,65 @@
+# RSS/Atomフィード設定
+# カテゴリ別に購読するフィードを定義
+
+feeds:
+  engineer:
+    - name: OpenAI Blog
+      url: https://openai.com/blog/rss.xml
+      priority: 1
+
+    - name: Anthropic News
+      url: https://www.anthropic.com/rss.xml
+      priority: 1
+
+    - name: Zenn AI Topics
+      url: https://zenn.dev/topics/ai/feed
+      priority: 2
+
+    - name: Zenn ChatGPT Topics
+      url: https://zenn.dev/topics/chatgpt/feed
+      priority: 2
+
+    - name: Hugging Face Blog
+      url: https://huggingface.co/blog/feed.xml
+      priority: 2
+
+  consultant:
+    - name: MIT Sloan AI
+      url: https://sloanreview.mit.edu/tag/artificial-intelligence/feed/
+      priority: 1
+
+    - name: McKinsey Insights
+      url: https://www.mckinsey.com/insights/rss
+      priority: 2
+
+  backoffice:
+    - name: Google Workspace Updates
+      url: https://workspaceupdates.googleblog.com/atom.xml
+      priority: 1
+
+    - name: Microsoft 365 Blog
+      url: https://www.microsoft.com/en-us/microsoft-365/blog/feed/
+      priority: 2
+
+# 全カテゴリ共通（補足用）
+  common:
+    - name: The Verge AI
+      url: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+      priority: 3
+
+    - name: TechCrunch AI
+      url: https://techcrunch.com/category/artificial-intelligence/feed/
+      priority: 3
+
+settings:
+  # 1投稿あたりの最大記事数
+  max_articles: 3
+
+  # フィード取得タイムアウト（秒）
+  timeout_seconds: 10
+
+  # キャッシュ時間（時間）- 将来の拡張用
+  cache_hours: 6
+
+  # 記事の最大日数（これより古い記事は除外）
+  max_age_days: 7
