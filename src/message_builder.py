@@ -3,6 +3,7 @@
 Markdown形式のメッセージを生成
 """
 
+import re
 from typing import Optional
 
 
@@ -79,67 +80,15 @@ class MessageBuilder:
         """
         Tips本文を読みやすく整形
 
-        - 各セクションを明確に分ける
-        - 適切な空行を追加
-        - プロンプトはコードブロックで表示（コピーしやすく）
+        - 「〜」で囲まれたプロンプト例をインラインコードに変換
         """
         if not content:
             return ""
 
-        lines = content.split('\n')
-        formatted_lines = []
-        in_prompt = False
-        prompt_lines = []
+        # 「〜」で囲まれた部分を `〜` に変換
+        formatted = re.sub(r'「([^」]+)」', r'`\1`', content)
 
-        for line in lines:
-            # 空行はそのまま
-            if not line.strip():
-                if not in_prompt:
-                    formatted_lines.append("")
-                continue
-
-            # プロンプト開始（「で始まる）
-            if line.startswith('「') and not in_prompt:
-                in_prompt = True
-                # 「」が同じ行で完結する場合
-                if line.endswith('」'):
-                    formatted_lines.append("")
-                    formatted_lines.append("```")
-                    formatted_lines.append(line[1:-1])  # 「」を除去
-                    formatted_lines.append("```")
-                    formatted_lines.append("")
-                    in_prompt = False
-                else:
-                    prompt_lines.append(line[1:])  # 「を除去
-                continue
-
-            # プロンプト終了（」で終わる）
-            if in_prompt and line.endswith('」'):
-                prompt_lines.append(line[:-1])  # 」を除去
-                formatted_lines.append("")
-                formatted_lines.append("```")
-                formatted_lines.extend(prompt_lines)
-                formatted_lines.append("```")
-                formatted_lines.append("")
-                prompt_lines = []
-                in_prompt = False
-                continue
-
-            # プロンプト継続中
-            if in_prompt:
-                prompt_lines.append(line)
-                continue
-
-            # セクションヘッダー
-            if line.startswith('📋'):
-                formatted_lines.append("")
-                formatted_lines.append(line)
-            elif line.startswith('⏱️') or line.startswith('💻'):
-                formatted_lines.append(line)
-            else:
-                formatted_lines.append(line)
-
-        return '\n'.join(formatted_lines)
+        return formatted
 
     def build_error_message(self, error: str) -> str:
         """エラーメッセージを組み立て"""
