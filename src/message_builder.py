@@ -38,11 +38,20 @@ class MessageBuilder:
         lines.append(f"💡 *{tip.get('title', 'タイトルなし')}*")
         lines.append("")
 
-        # Tips本文を整形
+        # Tips本文
         content = tip.get('content', '')
-        formatted_content = self._format_content(content)
-        lines.append(formatted_content)
-        lines.append("")
+        if content:
+            lines.append(content)
+            lines.append("")
+
+        # プロンプト（あればコードブロックで表示）
+        prompt = tip.get('prompt', '')
+        if prompt:
+            lines.append("📋 コピペで使えるプロンプト:")
+            lines.append("```")
+            lines.append(prompt)
+            lines.append("```")
+            lines.append("")
 
         # タグ
         tags = tip.get("tags", [])
