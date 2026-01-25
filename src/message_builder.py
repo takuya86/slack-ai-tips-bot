@@ -85,10 +85,10 @@ class MessageBuilder:
         if not content:
             return ""
 
-        # 「〜」で囲まれた部分を `〜` に変換
-        formatted = re.sub(r'「([^」]+)」', r'`\1`', content)
+        # 「〜」で囲まれた部分をコードブロックに変換
+        formatted = re.sub(r'「([^」]+)」', r'\n```\n\1\n```\n', content)
 
-        return formatted
+        return formatted.strip()
 
     def build_error_message(self, error: str) -> str:
         """エラーメッセージを組み立て"""
