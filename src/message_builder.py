@@ -85,8 +85,10 @@ class MessageBuilder:
         if not content:
             return ""
 
-        # そのまま表示（「」はそのまま残す）
-        return content
+        # 最初の「から最後の」までをコードブロック化（ネスト対応）
+        formatted = re.sub(r'「(.*)」', r'\n```\n\1\n```\n', content, flags=re.DOTALL)
+
+        return formatted.strip()
 
     def build_error_message(self, error: str) -> str:
         """エラーメッセージを組み立て"""
