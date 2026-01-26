@@ -83,10 +83,11 @@ def main():
 
         logger.info(f"Selected tip: {tip.get('title')} (ID: {tip.get('id')})")
 
-        # 4. RSS取得
+        # 4. RSS取得（Tipsのタグで関連記事を優先）
         logger.info("Fetching RSS feeds...")
         rss_fetcher = RSSFetcher(Config.RSS_CONFIG_FILE)
-        articles = rss_fetcher.fetch(category, limit=Config.RSS_FETCH_LIMIT)
+        tip_tags = tip.get("tags", [])
+        articles = rss_fetcher.fetch(category, limit=Config.RSS_FETCH_LIMIT, tags=tip_tags)
         logger.info(f"Fetched {len(articles)} articles")
 
         # 5. メッセージ組み立て

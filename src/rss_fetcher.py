@@ -48,7 +48,7 @@ class RSSFetcher:
         with open(self.config_file, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
-    def fetch(self, category: str, limit: int = 3) -> list[Article]:
+    def fetch(self, category: str, limit: int = 3, tags: list[str] = None) -> list[Article]:
         """
         指定カテゴリのRSSから最新記事を取得
 
@@ -57,11 +57,13 @@ class RSSFetcher:
         2. commonカテゴリのフィードも追加
         3. 各フィードをパース（エラーはスキップ）
         4. 全記事をマージして日付でソート
-        5. 日本語記事を優先して上位limit件を返す
+        5. タグに関連する記事を優先
+        6. 日本語記事を優先して上位limit件を返す
 
         Args:
             category: 記事カテゴリ
             limit: 取得する記事数
+            tags: Tipsのタグ（関連記事を優先するため）
 
         Returns:
             記事のリスト（最大limit件）
@@ -96,11 +98,27 @@ class RSSFetcher:
                 logger.warning(f"Failed to fetch feed {source}: {e}")
                 continue
 
-        # 日本語記事を優先、その後日付でソート
+        # タグ関連度スコアを計算
+        def calc_relevance(article: Article) -> int:
+            if not tags:
+                return 0
+            score = 0
+            title_lower = article.title.lower()
+            desc_lower = article.description.lower() if article.description else ""
+            for tag in tags:
+                tag_lower = tag.lower()
+                if tag_lower in title_lower:
+                    score += 2  # タイトルに含まれる場合は高スコア
+                if tag_lower in desc_lower:
+                    score += 1  # 概要に含まれる場合
+            return score
+
+        # 日本語優先、タグ関連度、新しい順でソート
         articles = sorted(
             articles,
             key=lambda x: (
                 0 if x.lang == "ja" else 1,  # 日本語優先
+                -calc_relevance(x),  # タグ関連度（高い方が先）
                 -self._parse_date(x.published).timestamp()  # 新しい順
             )
         )
