@@ -1,0 +1,24 @@
+name: Weekly Tips Update Reminder
+
+on:
+  schedule:
+    # 毎週月曜 10:00 JST (01:00 UTC)
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+
+jobs:
+  send-reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send DM reminder
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_USER_ID: ${{ secrets.SLACK_USER_ID }}
+        run: |
+          curl -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"channel\": \"$SLACK_USER_ID\",
+              \"text\": \"📅 *週次リマインダー*\n\nAI活用Tipsの更新をお願いします。\n\nClaude Codeで以下を実行:\n\`\`\`\nTips更新して\n\`\`\`\n\n最新のAI活用事例を収集して、tips.jsonを更新します。\"
+            }"
