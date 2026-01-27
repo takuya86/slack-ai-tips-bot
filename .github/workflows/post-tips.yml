@@ -2,14 +2,12 @@ name: Post AI Tips to Slack
 
 on:
   schedule:
-    # テスト用: 22:05 JST (13:05 UTC)
-    - cron: '5 13 * * *'
-    # # 毎日 9:00 JST (00:00 UTC) - エンジニア向け
-    # - cron: '0 0 * * *'
-    # # 毎日 12:00 JST (03:00 UTC) - コンサルタント向け
-    # - cron: '0 3 * * *'
-    # # 毎日 18:00 JST (09:00 UTC) - バックオフィス向け
-    # - cron: '0 9 * * *'
+    # 毎日 9:00 JST (00:00 UTC) - エンジニア向け
+    - cron: '0 0 * * *'
+    # 毎日 12:00 JST (03:00 UTC) - コンサルタント向け
+    - cron: '0 3 * * *'
+    # 毎日 18:00 JST (09:00 UTC) - バックオフィス向け
+    - cron: '0 9 * * *'
   workflow_dispatch:
     inputs:
       category:
