@@ -2,8 +2,8 @@ name: Post AI Tips to Slack
 
 on:
   schedule:
-    # テスト用: 2分ごと
-    - cron: '*/2 * * * *'
+    # テスト用: 5分ごと（GitHub最短間隔）
+    - cron: '*/5 * * * *'
     # # 毎日 9:00 JST (00:00 UTC) - エンジニア向け
     # - cron: '0 0 * * *'
     # # 毎日 12:00 JST (03:00 UTC) - コンサルタント向け
