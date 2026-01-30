@@ -55,7 +55,9 @@ def main():
             Config.validate()
 
         # 2. カテゴリ決定
-        tips_selector = TipsSelector(Config.TIPS_FILE)
+        source_type, tips_path = Config.get_tips_source()
+        logger.info(f"Tips source: {source_type} ({tips_path})")
+        tips_selector = TipsSelector(source_type, tips_path)
         available_categories = tips_selector.get_categories()
 
         # コマンドライン引数 > 環境変数 > ランダム

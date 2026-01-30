@@ -10,6 +10,71 @@
 | 12:00 | consultant | コンサルタント向け |
 | 18:00 | backoffice | バックオフィス向け |
 
+## cron-job.org 設定
+
+定期実行は [cron-job.org](https://cron-job.org/) を使用してGitHub APIを呼び出します。
+
+### 前提条件
+
+1. **GitHub PAT (Personal Access Token)** が必要
+   - GitHub → Settings → Developer settings → Fine-grained tokens
+   - Repository: `slack-ai-tips-bot` のみ
+   - Permissions: Actions (Read and write)
+
+2. **DATA_REPO_PAT** シークレットを設定
+   - slack-ai-tips-bot → Settings → Secrets → `DATA_REPO_PAT`
+   - obsidian-sns-dataへの読み書き権限が必要
+
+### cron-job.org でのジョブ設定
+
+#### 共通設定
+
+| 項目 | 値 |
+|-----|-----|
+| URL | `https://api.github.com/repos/takuya86/slack-ai-tips-bot/actions/workflows/post-tips.yml/dispatches` |
+| Method | POST |
+| Headers | `Accept: application/vnd.github+json`<br>`Authorization: Bearer <YOUR_PAT>` |
+
+#### ジョブ1: エンジニア向け (9:00 JST)
+
+| 項目 | 値 |
+|-----|-----|
+| Schedule | `0 0 * * *` (00:00 UTC) |
+| Body | `{"ref":"main","inputs":{"category":"engineer"}}` |
+
+#### ジョブ2: コンサルタント向け (12:00 JST)
+
+| 項目 | 値 |
+|-----|-----|
+| Schedule | `0 3 * * *` (03:00 UTC) |
+| Body | `{"ref":"main","inputs":{"category":"consultant"}}` |
+
+#### ジョブ3: バックオフィス向け (18:00 JST)
+
+| 項目 | 値 |
+|-----|-----|
+| Schedule | `0 9 * * *` (09:00 UTC) |
+| Body | `{"ref":"main","inputs":{"category":"backoffice"}}` |
+
+#### ジョブ4: 週次リマインダー (月曜 10:00 JST)
+
+| 項目 | 値 |
+|-----|-----|
+| URL | `.../workflows/weekly-reminder.yml/dispatches` |
+| Schedule | `0 1 * * 1` (01:00 UTC, Monday) |
+| Body | `{"ref":"main"}` |
+
+### テスト方法
+
+```bash
+# curlでテスト実行
+curl -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer YOUR_PAT" \
+  https://api.github.com/repos/takuya86/slack-ai-tips-bot/actions/workflows/post-tips.yml/dispatches \
+  -d '{"ref":"main","inputs":{"category":"engineer"}}'
+```
+
 ## 日常運用
 
 ### 配信状況の確認
@@ -27,17 +92,14 @@
 
 ### Tips残数の確認
 
+Tipsデータは [obsidian-sns-data/ai-tips](https://github.com/takuya86/obsidian-sns-data/tree/main/ai-tips) で管理しています。
+
 ```bash
-# ローカルで実行
-python -c "
-import json
-with open('data/tips.json') as f:
-    tips = json.load(f)['tips']
-for cat in ['engineer', 'consultant', 'backoffice']:
-    unused = len([t for t in tips if t['category'] == cat and t['used_count'] == 0])
-    total = len([t for t in tips if t['category'] == cat])
-    print(f'{cat}: {unused}/{total} 未使用')
-"
+# Obsidian (Markdown) から確認
+git clone https://github.com/takuya86/obsidian-sns-data.git /tmp/data
+grep -r "used_count: 0" /tmp/data/ai-tips/engineer/ | wc -l  # エンジニア未使用数
+grep -r "used_count: 0" /tmp/data/ai-tips/consultant/ | wc -l  # コンサル未使用数
+grep -r "used_count: 0" /tmp/data/ai-tips/backoffice/ | wc -l  # バックオフィス未使用数
 ```
 
 ### 週次タスク

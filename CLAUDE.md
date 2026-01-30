@@ -9,36 +9,46 @@ SlackにAI活用Tipsを自動配信するBot。
   - 12:00 JST: コンサルタント向け
   - 18:00 JST: バックオフィス向け
 - RSSから最新AI記事も同時配信
-- GitHub Actionsで自動実行
+- cron-job.org → GitHub Actions で自動実行
 
-## ディレクトリ構成
+## アーキテクチャ
 
 ```
-src/           # Pythonソースコード
-data/          # tips.json（Tipsデータ）
-config/        # rss_feeds.yaml（RSSフィード設定）
-docs/          # ドキュメント
-.github/       # GitHub Actions
+┌─────────────┐      ┌──────────────────┐      ┌─────────────────────┐
+│ cron-job.org│─────▶│  GitHub Actions  │─────▶│  obsidian-sns-data  │
+│  (定期実行)  │      │  (post-tips.yml) │      │    (ai-tips/*.md)   │
+└─────────────┘      └──────────────────┘      └─────────────────────┘
+                              │
+                              ▼
+                       ┌────────────┐
+                       │   Slack    │
+                       └────────────┘
+```
+
+## データソース
+
+**Tipsデータは [obsidian-sns-data](https://github.com/takuya86/obsidian-sns-data) で管理**
+
+```
+obsidian-sns-data/ai-tips/
+├── tips.md              # メタデータ一覧
+├── engineer/            # エンジニア向け（40件）
+├── consultant/          # コンサルタント向け（30件）
+└── backoffice/          # バックオフィス向け（30件）
 ```
 
 ## 主要コマンド
 
 ```bash
-# Tips配信（ローカル）
-python src/main.py --category engineer
+# Tips配信（ローカル・Markdownデータ使用）
+DATA_REPO_PATH=/path/to/obsidian-sns-data/ai-tips python src/main.py --category engineer
 
-# ドライラン
+# ドライラン（JSONフォールバック）
 python src/main.py --dry-run
 
 # Tips残数確認
-python -c "
-import json
-with open('data/tips.json') as f:
-    tips = json.load(f)['tips']
-for cat in ['engineer', 'consultant', 'backoffice']:
-    unused = len([t for t in tips if t['category'] == cat and t['used_count'] == 0])
-    print(f'{cat}: {unused}件 未使用')
-"
+git clone https://github.com/takuya86/obsidian-sns-data.git /tmp/data
+grep -r "used_count: 0" /tmp/data/ai-tips/engineer/ | wc -l
 ```
 
 ## Tips追加時のルール
@@ -63,11 +73,22 @@ for cat in ['engineer', 'consultant', 'backoffice']:
 | 変数 | 用途 |
 |------|------|
 | `SLACK_WEBHOOK_URL` | Slack Webhook URL（必須） |
+| `DATA_REPO_PATH` | Obsidianデータパス（GitHub Actions用） |
 | `SLACK_BOT_TOKEN` | Bot Token（DM用） |
 | `SLACK_USER_ID` | ユーザーID（DM用） |
+
+## GitHub Secrets
+
+| Secret | 用途 |
+|--------|------|
+| `SLACK_WEBHOOK_URL` | Slack Webhook URL |
+| `DATA_REPO_PAT` | obsidian-sns-dataへのアクセストークン |
+| `SLACK_BOT_TOKEN` | Bot Token（リマインダー用） |
+| `SLACK_USER_ID` | ユーザーID（リマインダー用） |
 
 ## 関連リンク
 
 - GitHub: https://github.com/takuya86/slack-ai-tips-bot
-- Issues: https://github.com/takuya86/slack-ai-tips-bot/issues
+- データ: https://github.com/takuya86/obsidian-sns-data/tree/main/ai-tips
 - Actions: https://github.com/takuya86/slack-ai-tips-bot/actions
+- 運用ガイド: `docs/operations.md`
