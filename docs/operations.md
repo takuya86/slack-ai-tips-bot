@@ -16,14 +16,15 @@
 
 ### 前提条件
 
-1. **GitHub PAT (Personal Access Token)** が必要
-   - GitHub → Settings → Developer settings → Fine-grained tokens
-   - Repository: `slack-ai-tips-bot` のみ
-   - Permissions: Actions (Read and write)
+1. **GitHub PAT (Fine-grained token)** が必要
+   - https://github.com/settings/tokens?type=beta
+   - Repository access: `slack-ai-tips-bot`, `obsidian-sns-data`
+   - Permissions: Contents (Read and write)
 
 2. **DATA_REPO_PAT** シークレットを設定
-   - slack-ai-tips-bot → Settings → Secrets → `DATA_REPO_PAT`
-   - obsidian-sns-dataへの読み書き権限が必要
+   - https://github.com/takuya86/slack-ai-tips-bot/settings/secrets/actions
+   - Name: `DATA_REPO_PAT`
+   - Value: 上記で作成したPAT
 
 ### cron-job.org でのジョブ設定
 
@@ -32,48 +33,61 @@
 | 項目 | 値 |
 |-----|-----|
 | URL | `https://api.github.com/repos/takuya86/slack-ai-tips-bot/actions/workflows/post-tips.yml/dispatches` |
-| Method | POST |
-| Headers | `Accept: application/vnd.github+json`<br>`Authorization: Bearer <YOUR_PAT>` |
+| Request method | POST |
+
+**Headers:**
+
+| Key | Value |
+|-----|-------|
+| Authorization | `Bearer github_pat_xxxxx...` |
+| Content-Type | `application/json` |
+| Accept | `application/vnd.github+json` |
 
 #### ジョブ1: エンジニア向け (9:00 JST)
 
 | 項目 | 値 |
 |-----|-----|
+| Title | `AI Tips - Engineer` |
 | Schedule | `0 0 * * *` (00:00 UTC) |
-| Body | `{"ref":"main","inputs":{"category":"engineer"}}` |
+| Request body | `{"ref":"main","inputs":{"category":"engineer"}}` |
 
 #### ジョブ2: コンサルタント向け (12:00 JST)
 
 | 項目 | 値 |
 |-----|-----|
+| Title | `AI Tips - Consultant` |
 | Schedule | `0 3 * * *` (03:00 UTC) |
-| Body | `{"ref":"main","inputs":{"category":"consultant"}}` |
+| Request body | `{"ref":"main","inputs":{"category":"consultant"}}` |
 
 #### ジョブ3: バックオフィス向け (18:00 JST)
 
 | 項目 | 値 |
 |-----|-----|
+| Title | `AI Tips - Backoffice` |
 | Schedule | `0 9 * * *` (09:00 UTC) |
-| Body | `{"ref":"main","inputs":{"category":"backoffice"}}` |
+| Request body | `{"ref":"main","inputs":{"category":"backoffice"}}` |
 
 #### ジョブ4: 週次リマインダー (月曜 10:00 JST)
 
 | 項目 | 値 |
 |-----|-----|
-| URL | `.../workflows/weekly-reminder.yml/dispatches` |
+| Title | `AI Tips - Weekly Reminder` |
+| URL | `https://api.github.com/repos/takuya86/slack-ai-tips-bot/actions/workflows/weekly-reminder.yml/dispatches` |
 | Schedule | `0 1 * * 1` (01:00 UTC, Monday) |
-| Body | `{"ref":"main"}` |
+| Request body | `{"ref":"main"}` |
 
 ### テスト方法
 
 ```bash
-# curlでテスト実行
 curl -X POST \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer YOUR_PAT" \
+  -H "Content-Type: application/json" \
   https://api.github.com/repos/takuya86/slack-ai-tips-bot/actions/workflows/post-tips.yml/dispatches \
   -d '{"ref":"main","inputs":{"category":"engineer"}}'
 ```
+
+成功時は HTTP 204 が返ります。
 
 ## 日常運用
 

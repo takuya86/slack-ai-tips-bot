@@ -41,14 +41,13 @@ obsidian-sns-data/ai-tips/
 
 ```bash
 # Tips配信（ローカル・Markdownデータ使用）
-DATA_REPO_PATH=/path/to/obsidian-sns-data/ai-tips python src/main.py --category engineer
-
-# ドライラン（JSONフォールバック）
-python src/main.py --dry-run
+git clone https://github.com/takuya86/obsidian-sns-data.git /tmp/data
+DATA_REPO_PATH=/tmp/data/ai-tips python src/main.py --dry-run --category engineer
 
 # Tips残数確認
-git clone https://github.com/takuya86/obsidian-sns-data.git /tmp/data
-grep -r "used_count: 0" /tmp/data/ai-tips/engineer/ | wc -l
+grep -r "used_count: 0" /tmp/data/ai-tips/engineer/ | wc -l    # エンジニア
+grep -r "used_count: 0" /tmp/data/ai-tips/consultant/ | wc -l  # コンサル
+grep -r "used_count: 0" /tmp/data/ai-tips/backoffice/ | wc -l  # バックオフィス
 ```
 
 ## Tips追加時のルール
