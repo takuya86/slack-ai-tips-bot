@@ -1,9 +1,8 @@
 name: Weekly Tips Update Reminder
 
 on:
-  schedule:
-    # 毎週月曜 10:00 JST (01:00 UTC)
-    - cron: '0 1 * * 1'
+  repository_dispatch:
+    types: [weekly-reminder]
   workflow_dispatch:
 
 jobs:

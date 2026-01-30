@@ -1,6 +1,8 @@
 name: Post AI Tips to Slack
 
 on:
+  repository_dispatch:
+    types: [post-tips]
   workflow_dispatch:
     inputs:
       category:
@@ -37,7 +39,7 @@ jobs:
       - name: Post tips
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          CATEGORY: ${{ github.event.inputs.category }}
+          CATEGORY: ${{ github.event.client_payload.category || github.event.inputs.category }}
           DATA_REPO_PATH: data-repo/ai-tips
         run: python src/main.py
 
