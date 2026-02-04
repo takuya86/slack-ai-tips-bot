@@ -179,9 +179,9 @@ class TipsSelector:
         # 元のファイルを読み込んでused_countのみ更新
         content = file_path.read_text(encoding="utf-8")
 
-        # used_count行を置換
+        # used_count行を置換（マイナス値にも対応）
         new_content = re.sub(
-            r'^used_count: \d+',
+            r'^used_count: -?\d+',
             f'used_count: {tip["used_count"]}',
             content,
             flags=re.MULTILINE
