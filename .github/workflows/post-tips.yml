@@ -33,6 +33,7 @@ jobs:
       - name: Clone data repo
         env:
           GH_TOKEN: ${{ secrets.DATA_REPO_PAT }}
+          GIT_LFS_SKIP_SMUDGE: 1
         run: |
           git clone --depth 1 "https://$GH_TOKEN@github.com/takuya86/obsidian-sns-data.git" data-repo
 
