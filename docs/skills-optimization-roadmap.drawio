@@ -1,0 +1,419 @@
+<mxfile host="app.diagrams.net" modified="2026-02-14" type="device">
+  <diagram id="optimization" name="Skills Optimization Roadmap">
+    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="Skills Optimization Roadmap" style="text;html=1;fontSize=22;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="450" y="10" width="400" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="Skill → Subagent parallel execution" style="text;html=1;fontSize=12;fontColor=#666;align=center;" vertex="1" parent="1">
+          <mxGeometry x="450" y="38" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Phase 1: Done ===== -->
+        <mxCell id="ph1" value="Done" style="swimlane;startSize=24;fillColor=#E8F5E9;strokeColor=#4CAF50;rounded=1;fontSize=13;fontStyle=1;swimlaneLine=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="75" width="370" height="130" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d1_sk" value="/tips-update" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FF9800;fontSize=11;fontStyle=1;" vertex="1" parent="ph1">
+          <mxGeometry x="15" y="40" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="d1_a1" value="trend-researcher x3" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="ph1">
+          <mxGeometry x="175" y="32" width="110" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="d1_a2" value="coder x3" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ph1">
+          <mxGeometry x="175" y="65" width="110" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="d1_e1" value="x3" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="ph1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="115" y="50" as="sourcePoint" />
+            <mxPoint x="175" y="46" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d1_e2" value="x3" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="ph1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="115" y="60" as="sourcePoint" />
+            <mxPoint x="175" y="79" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d1_desc" value="Web検索並列 → Tips作成並列" style="text;html=1;fontSize=9;fontColor=#666;align=left;" vertex="1" parent="ph1">
+          <mxGeometry x="15" y="100" width="200" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="d1_check" value="✓" style="text;html=1;fontSize=18;fontColor=#4CAF50;fontStyle=1;" vertex="1" parent="ph1">
+          <mxGeometry x="330" y="40" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Phase 2: High Priority ===== -->
+        <mxCell id="ph2" value="Phase 1 - High Priority" style="swimlane;startSize=24;fillColor=#FFF3E0;strokeColor=#FF9800;rounded=1;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="225" width="740" height="260" as="geometry" />
+        </mxCell>
+
+        <!-- 1. /web-research -->
+        <mxCell id="p1_sk" value="/web-research" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#E91E63;fontSize=10;fontStyle=1;" vertex="1" parent="ph2">
+          <mxGeometry x="15" y="35" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_a1" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="165" y="30" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_a2" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="265" y="30" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_a3" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="365" y="30" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_e" value="x3" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="ph2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="49" as="sourcePoint" />
+            <mxPoint x="165" y="42" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p1_desc" value="はてブ / HN / Google 並列検索" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph2">
+          <mxGeometry x="470" y="33" width="160" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_num" value="①" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#FF9800;" vertex="1" parent="ph2">
+          <mxGeometry x="700" y="33" width="25" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 2. /review -->
+        <mxCell id="p2_sk" value="/review" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="ph2">
+          <mxGeometry x="15" y="75" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_a1" value="code-reviewer" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="165" y="70" width="90" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_a2" value="security-checker" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="265" y="70" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_e" value="並列" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="ph2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="89" as="sourcePoint" />
+            <mxPoint x="165" y="82" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2_desc" value="品質 + セキュリティ 同時チェック" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph2">
+          <mxGeometry x="370" y="73" width="170" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_num" value="②" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#FF9800;" vertex="1" parent="ph2">
+          <mxGeometry x="700" y="73" width="25" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 3. /note-weekly-factory -->
+        <mxCell id="p3_sk" value="/note-weekly" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="ph2">
+          <mxGeometry x="15" y="115" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_a1" value="content-creator" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="165" y="110" width="90" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_a2" value="content-creator" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="265" y="110" width="90" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_a3" value="content-creator" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="365" y="110" width="90" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_e" value="x3" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="ph2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="129" as="sourcePoint" />
+            <mxPoint x="165" y="122" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3_r" value="article-proofreader" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="505" y="110" width="105" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_e2" value="→" style="endArrow=block;endFill=1;strokeColor=#999;strokeWidth=1;fontSize=8;" edge="1" parent="ph2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="455" y="122" as="sourcePoint" />
+            <mxPoint x="505" y="122" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3_desc" value="3本並列執筆 → 校正" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph2">
+          <mxGeometry x="615" y="113" width="110" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_num" value="③" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#FF9800;" vertex="1" parent="ph2">
+          <mxGeometry x="700" y="113" width="25" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 4. /collect-engineer-troubles -->
+        <mxCell id="p4_sk" value="/collect-eng" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#E91E63;fontSize=10;fontStyle=1;" vertex="1" parent="ph2">
+          <mxGeometry x="15" y="155" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_a1" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="165" y="150" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_a2" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="265" y="150" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_a3" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="365" y="150" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_e" value="x3" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="ph2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="169" as="sourcePoint" />
+            <mxPoint x="165" y="162" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p4_desc" value="はてブ / Zenn / Reddit 並列収集" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph2">
+          <mxGeometry x="470" y="153" width="170" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_num" value="④" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#FF9800;" vertex="1" parent="ph2">
+          <mxGeometry x="700" y="153" width="25" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 5. /collect-stories -->
+        <mxCell id="p5_sk" value="/collect-stories" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#E91E63;fontSize=10;fontStyle=1;" vertex="1" parent="ph2">
+          <mxGeometry x="15" y="195" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_a1" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="165" y="190" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_a2" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="265" y="190" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_a3" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph2">
+          <mxGeometry x="365" y="190" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_e" value="x3" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="ph2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="209" as="sourcePoint" />
+            <mxPoint x="165" y="202" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p5_desc" value="知恵袋 / note / Reddit 並列収集" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph2">
+          <mxGeometry x="470" y="193" width="170" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_num" value="⑤" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#FF9800;" vertex="1" parent="ph2">
+          <mxGeometry x="700" y="193" width="25" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_line" value="" style="line;strokeColor=#E0E0E0;strokeWidth=1;" vertex="1" parent="ph2">
+          <mxGeometry x="10" y="230" width="720" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ph2_summary" value="並列化で 情報量2-3x + 速度2-3x" style="text;html=1;fontSize=10;fontColor=#FF9800;fontStyle=1;align=right;" vertex="1" parent="ph2">
+          <mxGeometry x="470" y="234" width="250" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Phase 3: Medium Priority ===== -->
+        <mxCell id="ph3" value="Phase 2 - Medium Priority" style="swimlane;startSize=24;fillColor=#E3F2FD;strokeColor=#2196F3;rounded=1;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="505" width="740" height="230" as="geometry" />
+        </mxCell>
+
+        <!-- 6. /note-write -->
+        <mxCell id="m1_sk" value="/note-write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="ph3">
+          <mxGeometry x="15" y="35" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_a1" value="content-creator" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="165" y="30" width="90" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_a2" value="article-proofreader" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="310" y="30" width="105" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_e1" value="" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;" edge="1" parent="ph3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="49" as="sourcePoint" />
+            <mxPoint x="165" y="42" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1_e2" value="then" style="endArrow=block;endFill=1;strokeColor=#999;fontSize=8;fontColor=#999;" edge="1" parent="ph3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="255" y="42" as="sourcePoint" />
+            <mxPoint x="310" y="42" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1_desc" value="執筆 → 校正 パイプライン" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph3">
+          <mxGeometry x="425" y="33" width="140" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_num" value="⑥" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#2196F3;" vertex="1" parent="ph3">
+          <mxGeometry x="700" y="33" width="25" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 7. /incident-response -->
+        <mxCell id="m2_sk" value="/incident-resp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="ph3">
+          <mxGeometry x="15" y="75" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_a1" value="coder" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="165" y="70" width="60" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_a2" value="security-checker" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="235" y="70" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_e" value="並列" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="ph3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="89" as="sourcePoint" />
+            <mxPoint x="165" y="82" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2_desc" value="原因調査 + 脆弱性確認 並列" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph3">
+          <mxGeometry x="340" y="73" width="160" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_num" value="⑦" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#2196F3;" vertex="1" parent="ph3">
+          <mxGeometry x="700" y="73" width="25" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 8. /design-document -->
+        <mxCell id="m3_sk" value="/design-doc" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#5C6BC0;fontSize=10;fontStyle=1;" vertex="1" parent="ph3">
+          <mxGeometry x="15" y="115" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_a1" value="architect" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="165" y="110" width="65" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_a2" value="code-reviewer" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="285" y="110" width="85" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_e1" value="" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;" edge="1" parent="ph3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="129" as="sourcePoint" />
+            <mxPoint x="165" y="122" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3_e2" value="then" style="endArrow=block;endFill=1;strokeColor=#999;fontSize=8;fontColor=#999;" edge="1" parent="ph3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="230" y="122" as="sourcePoint" />
+            <mxPoint x="285" y="122" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3_desc" value="設計 → レビュー パイプライン" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph3">
+          <mxGeometry x="380" y="113" width="160" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_num" value="⑧" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#2196F3;" vertex="1" parent="ph3">
+          <mxGeometry x="700" y="113" width="25" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 9. /note-competitor -->
+        <mxCell id="m4_sk" value="/note-competitor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="ph3">
+          <mxGeometry x="15" y="155" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="m4_a1" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="165" y="150" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m4_a2" value="trend-researcher" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="265" y="150" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m4_e" value="x2" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="ph3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="169" as="sourcePoint" />
+            <mxPoint x="165" y="162" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4_desc" value="競合A / 競合B 並列調査" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph3">
+          <mxGeometry x="370" y="153" width="130" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m4_num" value="⑨" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#2196F3;" vertex="1" parent="ph3">
+          <mxGeometry x="700" y="153" width="25" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m5_sk" value="/article-gen" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#E91E63;fontSize=10;fontStyle=1;" vertex="1" parent="ph3">
+          <mxGeometry x="15" y="195" width="95" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="m5_a1" value="content-creator" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="165" y="190" width="90" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m5_a2" value="article-proofreader" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;" vertex="1" parent="ph3">
+          <mxGeometry x="310" y="190" width="105" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m5_e1" value="" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;" edge="1" parent="ph3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="209" as="sourcePoint" />
+            <mxPoint x="165" y="202" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5_e2" value="then" style="endArrow=block;endFill=1;strokeColor=#999;fontSize=8;fontColor=#999;" edge="1" parent="ph3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="255" y="202" as="sourcePoint" />
+            <mxPoint x="310" y="202" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5_desc" value="執筆 → 校正 パイプライン" style="text;html=1;fontSize=8;fontColor=#666;" vertex="1" parent="ph3">
+          <mxGeometry x="425" y="193" width="140" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m5_num" value="⑩" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#2196F3;" vertex="1" parent="ph3">
+          <mxGeometry x="700" y="193" width="25" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Legend ===== -->
+        <mxCell id="legend" value="" style="rounded=1;fillColor=#FAFAFA;strokeColor=#999;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="830" y="75" width="310" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="lt" value="Execution Pattern" style="text;html=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="80" width="150" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="l1_sk" value="Skill" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#999;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="850" y="110" width="50" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="l1_a" value="agent x3" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#999;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="940" y="108" width="60" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="l1_e" value="x3" style="endArrow=block;endFill=1;strokeColor=#FF6600;strokeWidth=2;fontSize=8;fontColor=#FF6600;fontStyle=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900" y="121" as="sourcePoint" />
+            <mxPoint x="940" y="119" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l1_t" value="= Parallel (同時実行)" style="text;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="110" width="120" height="18" as="geometry" />
+        </mxCell>
+
+        <mxCell id="l2_a1" value="agent A" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#999;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="850" y="148" width="60" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="l2_a2" value="agent B" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#999;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="950" y="148" width="60" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="l2_e" value="then" style="endArrow=block;endFill=1;strokeColor=#999;fontSize=8;fontColor=#999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="910" y="159" as="sourcePoint" />
+            <mxPoint x="950" y="159" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l2_t" value="= Pipeline (順次実行)" style="text;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="150" width="120" height="18" as="geometry" />
+        </mxCell>
+
+        <mxCell id="l3_c1" value="" style="rounded=1;fillColor=#E8F5E9;strokeColor=#4CAF50;" vertex="1" parent="1">
+          <mxGeometry x="850" y="188" width="14" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="l3_t1" value="Done" style="text;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="868" y="186" width="35" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="l3_c2" value="" style="rounded=1;fillColor=#FFF3E0;strokeColor=#FF9800;" vertex="1" parent="1">
+          <mxGeometry x="910" y="188" width="14" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="l3_t2" value="Phase 1" style="text;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="928" y="186" width="45" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="l3_c3" value="" style="rounded=1;fillColor=#E3F2FD;strokeColor=#2196F3;" vertex="1" parent="1">
+          <mxGeometry x="980" y="188" width="14" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="l3_t3" value="Phase 2" style="text;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="998" y="186" width="45" height="18" as="geometry" />
+        </mxCell>
+
+        <mxCell id="l4_t" value="① → ⑩ = implementation order" style="text;html=1;fontSize=9;fontColor=#666;" vertex="1" parent="1">
+          <mxGeometry x="850" y="215" width="180" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- Summary Box -->
+        <mxCell id="summary" value="" style="rounded=1;fillColor=#FFF8E1;strokeColor=#FFC107;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="830" y="270" width="310" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="sum_t" value="Impact Summary" style="text;html=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="275" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="sum1" value="Phase 1 (5 skills)" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#FF9800;align=left;" vertex="1" parent="1">
+          <mxGeometry x="845" y="300" width="130" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="sum1d" value="- 検索・収集系を並列化&#xa;- 情報量 2-3x&#xa;- 実行速度 2-3x" style="text;html=1;fontSize=9;align=left;" vertex="1" parent="1">
+          <mxGeometry x="845" y="318" width="200" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="sum2" value="Phase 2 (5 skills)" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#2196F3;align=left;" vertex="1" parent="1">
+          <mxGeometry x="845" y="370" width="130" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="sum2d" value="- 執筆→校正パイプライン&#xa;- 設計→レビューパイプライン&#xa;- 品質の安定化" style="text;html=1;fontSize=9;align=left;" vertex="1" parent="1">
+          <mxGeometry x="845" y="388" width="200" height="45" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
