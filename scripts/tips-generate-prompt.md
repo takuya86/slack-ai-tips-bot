@@ -58,6 +58,14 @@ used_count: 0
 - 💡ラベル: 「今日から使えるポイント」
 - タグ例: Claude, GitHub Copilot, CI/CD, コードレビュー
 
+### tools
+- 特定AIツール（Claude, Cursor, Cowork, Gemini, ChatGPT等）の具体的な活用事例
+- 業種を問わない汎用的な使い方 or 業種別の活用例
+- 「このツールでこうやったらこうなった」という実体験ベース
+- 設定方法・プロンプト例・ワークフロー例を含める
+- 💡ラベル: 「今日から試せるポイント」
+- タグ例: Claude, Cursor, Gemini, Cowork, ChatGPT, プロンプト, ワークフロー
+
 ## 品質基準
 
 1. タイトルに具体的な数字・成果を含める

@@ -68,20 +68,24 @@ get_latest_num() {
 ENG_UNUSED=$(count_unused "engineer")
 CON_UNUSED=$(count_unused "consultant")
 BO_UNUSED=$(count_unused "backoffice")
+TOOL_UNUSED=$(count_unused "tools")
 
 ENG_TOTAL=$(count_total "engineer")
 CON_TOTAL=$(count_total "consultant")
 BO_TOTAL=$(count_total "backoffice")
+TOOL_TOTAL=$(count_total "tools")
 
 echo "  engineer:   未使用 $ENG_UNUSED / 総数 $ENG_TOTAL"
 echo "  consultant: 未使用 $CON_UNUSED / 総数 $CON_TOTAL"
 echo "  backoffice: 未使用 $BO_UNUSED / 総数 $BO_TOTAL"
+echo "  tools:      未使用 $TOOL_UNUSED / 総数 $TOOL_TOTAL"
 
 # === Step 3: 補充が必要なカテゴリを判定 ===
 NEEDS_REPLENISH=()
 if [ "$CON_UNUSED" -le "$THRESHOLD" ]; then NEEDS_REPLENISH+=("consultant"); fi
 if [ "$BO_UNUSED" -le "$THRESHOLD" ]; then NEEDS_REPLENISH+=("backoffice"); fi
 if [ "$ENG_UNUSED" -le "$THRESHOLD" ]; then NEEDS_REPLENISH+=("engineer"); fi
+if [ "$TOOL_UNUSED" -le "$THRESHOLD" ]; then NEEDS_REPLENISH+=("tools"); fi
 
 if [ ${#NEEDS_REPLENISH[@]} -eq 0 ]; then
     echo "[OK] 全カテゴリ閾値以上。補充不要。"
@@ -105,6 +109,7 @@ for CATEGORY in "${NEEDS_REPLENISH[@]}"; do
         engineer)   PREFIX="eng" ;;
         consultant) PREFIX="con" ;;
         backoffice) PREFIX="bo" ;;
+        tools)      PREFIX="tool" ;;
     esac
 
     LATEST_NUM=$(get_latest_num "$CATEGORY" "$PREFIX")
@@ -126,6 +131,7 @@ for CATEGORY in "${NEEDS_REPLENISH[@]}"; do
         consultant) PROMPT=$(echo "$PROMPT" | sed 's|{{TIPS_LABEL}}|提案に使えるポイント|g') ;;
         backoffice) PROMPT=$(echo "$PROMPT" | sed 's|{{TIPS_LABEL}}|自社でも試せるポイント|g') ;;
         engineer)   PROMPT=$(echo "$PROMPT" | sed 's|{{TIPS_LABEL}}|今日から使えるポイント|g') ;;
+        tools)      PROMPT=$(echo "$PROMPT" | sed 's|{{TIPS_LABEL}}|今日から試せるポイント|g') ;;
     esac
 
     # Claude CLIで生成（非対話モード）
