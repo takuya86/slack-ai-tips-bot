@@ -4,9 +4,10 @@ SlackにAI活用Tipsを自動配信するBot。
 
 ## プロジェクト概要
 
-- 毎日3回、カテゴリ別にTipsを配信
+- 毎日4回、カテゴリ別にTipsを配信
   - 9:00 JST: エンジニア向け
   - 12:00 JST: コンサルタント向け
+  - 15:00 JST: AIツール活用（Claude/Cursor/Gemini等）
   - 18:00 JST: バックオフィス向け
 - RSSから最新AI記事も同時配信
 - cron-job.org → GitHub Actions で自動実行
@@ -32,9 +33,10 @@ SlackにAI活用Tipsを自動配信するBot。
 ```
 obsidian-sns-data/ai-tips/
 ├── tips.md              # メタデータ一覧
-├── engineer/            # エンジニア向け（40件）
-├── consultant/          # コンサルタント向け（30件）
-└── backoffice/          # バックオフィス向け（30件）
+├── engineer/            # エンジニア向け
+├── consultant/          # コンサルタント向け
+├── backoffice/          # バックオフィス向け
+└── tools/               # AIツール活用（業種横断）
 ```
 
 ## 主要コマンド
@@ -50,9 +52,23 @@ grep -r "used_count: 0" /tmp/data/ai-tips/consultant/ | wc -l  # コンサル
 grep -r "used_count: 0" /tmp/data/ai-tips/backoffice/ | wc -l  # バックオフィス
 ```
 
+## 配信スケジュール（cron-job.org）
+
+| 時刻 (JST) | カテゴリ | 対象 |
+|------------|---------|------|
+| 9:00 | engineer | エンジニア |
+| 12:00 | consultant | コンサルタント |
+| 15:00 | tools | AIツール活用（業種横断） |
+| 18:00 | backoffice | バックオフィス |
+
+**15:00 tools 配信の追加設定**: cron-job.orgで以下を追加
+- URL: `https://api.github.com/repos/takuya86/slack-ai-tips-bot/dispatches`
+- Body: `{"event_type": "post-tips", "client_payload": {"category": "tools"}}`
+- Schedule: `0 6 * * *` (UTC 06:00 = JST 15:00)
+
 ## Tips追加時のルール
 
-1. IDは `eng-XXX`, `con-XXX`, `bo-XXX` 形式
+1. IDは `eng-XXX`, `con-XXX`, `bo-XXX`, `tool-XXX` 形式
 2. タイトルに具体的な数字・成果を含める
 3. 「今日から使える」アクションを記載
 4. 出典URLを必ず記載

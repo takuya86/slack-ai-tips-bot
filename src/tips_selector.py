@@ -48,7 +48,7 @@ class TipsSelector:
             raise FileNotFoundError(f"Data repo path not found: {self.path}")
 
         # カテゴリ別ディレクトリを走査
-        for category_dir in ['engineer', 'consultant', 'backoffice']:
+        for category_dir in ['engineer', 'consultant', 'backoffice', 'tools']:
             cat_path = self.path / category_dir
             if not cat_path.exists():
                 continue
