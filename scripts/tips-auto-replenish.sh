@@ -177,6 +177,16 @@ for CATEGORY in "${NEEDS_REPLENISH[@]}"; do
     if echo "$PROMPT" | $CLAUDE_CMD -p > "$OUTPUT_FILE" 2>"$OUTPUT_FILE.err"; then
         OUT_LINES=$(wc -l < "$OUTPUT_FILE" | tr -d ' ')
         echo "  生成完了 ($OUT_LINES 行)。ファイル分割中..."
+        # 出力が極端に短い場合は再試行（1Tipにつき約25-30行が目安、10件なら250行以上）
+        MIN_LINES=$((REPLENISH_COUNT * 15))
+        if [ "$OUT_LINES" -lt "$MIN_LINES" ]; then
+            echo "  [WARN] 出力短すぎ ($OUT_LINES < $MIN_LINES 行)、再試行..."
+            sleep 3
+            if echo "$PROMPT" | $CLAUDE_CMD -p > "$OUTPUT_FILE" 2>"$OUTPUT_FILE.err"; then
+                OUT_LINES=$(wc -l < "$OUTPUT_FILE" | tr -d ' ')
+                echo "  再試行完了 ($OUT_LINES 行)"
+            fi
+        fi
     else
         ERR_MSG=$(head -3 "$OUTPUT_FILE.err" 2>/dev/null || echo "(no stderr)")
         echo "  [ERROR] Claude CLI実行失敗: $ERR_MSG"
@@ -264,12 +274,14 @@ fi
 # === Step 7: 補充後の残数を確認 ===
 echo ""
 echo "[INFO] 補充後の残数:"
-NEW_ENG=$(count_unused "engineer" || echo "?")
-NEW_CON=$(count_unused "consultant" || echo "?")
-NEW_BO=$(count_unused "backoffice" || echo "?")
+NEW_ENG=$(count_unused "engineer")
+NEW_CON=$(count_unused "consultant")
+NEW_BO=$(count_unused "backoffice")
+NEW_TOOL=$(count_unused "tools")
 echo "  engineer:   ${ENG_UNUSED} -> ${NEW_ENG}"
 echo "  consultant: ${CON_UNUSED} -> ${NEW_CON}"
 echo "  backoffice: ${BO_UNUSED} -> ${NEW_BO}"
+echo "  tools:      ${TOOL_UNUSED} -> ${NEW_TOOL}"
 
 # === Step 8: Slack通知 ===
 RESULT_MSG=":robot_face: *Tips自動補充完了* ($DATE_TODAY)\n\n"
@@ -280,7 +292,8 @@ done
 RESULT_MSG+="\n*残数:*\n"
 RESULT_MSG+="  - engineer: ${NEW_ENG}件\n"
 RESULT_MSG+="  - consultant: ${NEW_CON}件\n"
-RESULT_MSG+="  - backoffice: ${NEW_BO}件"
+RESULT_MSG+="  - backoffice: ${NEW_BO}件\n"
+RESULT_MSG+="  - tools: ${NEW_TOOL}件"
 
 notify_slack "$RESULT_MSG"
 
