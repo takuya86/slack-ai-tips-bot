@@ -1,8 +1,8 @@
 name: Post AI Tips to Slack
 
+# 通常はローカルcron(scripts/post-tips-local.sh)が配信を担当。
+# このワークフローはローカル障害時の手動フェイルオーバー用に残す（workflow_dispatchのみ）。
 on:
-  repository_dispatch:
-    types: [post-tips]
   workflow_dispatch:
     inputs:
       category:

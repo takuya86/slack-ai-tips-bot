@@ -1,10 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
+# === PATH（cron/launchd環境対応） ===
+export PATH="/opt/homebrew/bin:/usr/local/bin:/Users/takuyakawase/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
 # === 設定 ===
 THRESHOLD="${THRESHOLD:-5}"     # この件数以下で補充開始
 REPLENISH_COUNT="${REPLENISH_COUNT:-10}"  # 1カテゴリあたりの補充件数
-DATA_REPO="https://github.com/takuya86/obsidian-sns-data.git"
+DATA_REPO_OWNER="takuya86"
+DATA_REPO_NAME="obsidian-sns-data"
 WORK_DIR="/tmp/tips-replenish-$$"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
@@ -14,6 +18,14 @@ SLACK_WEBHOOK="${SLACK_WEBHOOK_URL:-}"
 CLAUDE_CMD="${CLAUDE_CMD:-claude}"
 DATE_TODAY=$(date +%Y-%m-%d)
 
+# .env読み込み（SLACK_WEBHOOK_URL等）
+if [ -f "$PROJECT_DIR/.env" ]; then
+    set -a
+    source "$PROJECT_DIR/.env"
+    set +a
+    SLACK_WEBHOOK="${SLACK_WEBHOOK:-${SLACK_WEBHOOK_URL:-}}"
+fi
+
 # === ログ設定 ===
 mkdir -p "$LOG_DIR"
 exec > >(tee -a "$LOG_FILE") 2>&1
@@ -22,15 +34,7 @@ echo "=========================================="
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Tips自動補充 開始"
 echo "=========================================="
 
-# === クリーンアップ ===
-cleanup() {
-    if [ -d "$WORK_DIR" ]; then
-        rm -rf "$WORK_DIR"
-    fi
-}
-trap cleanup EXIT
-
-# === Slack通知 ===
+# === Slack通知（先に定義） ===
 notify_slack() {
     local message="$1"
     if [ -n "$SLACK_WEBHOOK" ]; then
@@ -40,9 +44,36 @@ notify_slack() {
     fi
 }
 
-# === Step 1: データ取得 ===
+# === エラー時の詳細ログ ===
+on_error() {
+    local exit_code=$?
+    local line_no=$1
+    echo "[ERROR] line $line_no: exit code $exit_code" >&2
+    notify_slack ":x: *Tips自動補充 失敗* ($DATE_TODAY)\nline $line_no で異常終了 (exit $exit_code)\n詳細: \`$LOG_FILE\`"
+    exit $exit_code
+}
+trap 'on_error $LINENO' ERR
+
+# === クリーンアップ ===
+cleanup() {
+    if [ -d "$WORK_DIR" ]; then
+        rm -rf "$WORK_DIR"
+    fi
+}
+trap cleanup EXIT
+
+# === Step 1: データ取得（GitHub認証付き） ===
+# 注: gh CLIに複数アカウントある場合、--user で takuya86 を明示指定
+echo "[INFO] GitHub認証Token取得中..."
+GH_TOKEN=$(gh auth token --user "$DATA_REPO_OWNER" 2>&1) || {
+    echo "[ERROR] gh auth token --user $DATA_REPO_OWNER 失敗: $GH_TOKEN" >&2
+    notify_slack ":x: Tips自動補充: GitHub認証失敗。\`gh auth login\` を確認してください"
+    exit 1
+}
+DATA_REPO_URL="https://${GH_TOKEN}@github.com/${DATA_REPO_OWNER}/${DATA_REPO_NAME}.git"
+
 echo "[INFO] obsidian-sns-data をclone中..."
-GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 "$DATA_REPO" "$WORK_DIR" 2>/dev/null
+GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 "$DATA_REPO_URL" "$WORK_DIR"
 
 TIPS_DIR="$WORK_DIR/ai-tips"
 
@@ -51,12 +82,16 @@ echo "[INFO] Tips残数チェック..."
 
 count_unused() {
     local category="$1"
-    grep -rl "used_count: 0" "$TIPS_DIR/$category/" 2>/dev/null | wc -l | tr -d ' '
+    local n
+    n=$( { grep -rl "used_count: 0" "$TIPS_DIR/$category/" 2>/dev/null || true; } | wc -l | tr -d ' \n')
+    echo "${n:-0}"
 }
 
 count_total() {
     local category="$1"
-    ls "$TIPS_DIR/$category/"*.md 2>/dev/null | wc -l | tr -d ' '
+    local n
+    n=$( { find "$TIPS_DIR/$category" -name '*.md' 2>/dev/null || true; } | wc -l | tr -d ' \n')
+    echo "${n:-0}"
 }
 
 get_latest_num() {
@@ -113,7 +148,8 @@ for CATEGORY in "${NEEDS_REPLENISH[@]}"; do
     esac
 
     LATEST_NUM=$(get_latest_num "$CATEGORY" "$PREFIX")
-    START_NUM=$((LATEST_NUM + 1))
+    # 10# で10進数として明示（leading zeroの8進数解釈を回避）
+    START_NUM=$((10#${LATEST_NUM:-0} + 1))
     START_ID="${PREFIX}-$(printf '%03d' $START_NUM)"
 
     echo "  最新ID: ${PREFIX}-${LATEST_NUM}"
@@ -134,17 +170,21 @@ for CATEGORY in "${NEEDS_REPLENISH[@]}"; do
         tools)      PROMPT=$(echo "$PROMPT" | sed 's|{{TIPS_LABEL}}|今日から試せるポイント|g') ;;
     esac
 
-    # Claude CLIで生成（非対話モード）
+    # Claude CLIで生成（プロンプトはstdin経由）
     echo "  claude -p 実行中..."
     OUTPUT_FILE="/tmp/tips-output-${CATEGORY}-$$.md"
 
-    if $CLAUDE_CMD -p "$PROMPT" --max-turns 3 > "$OUTPUT_FILE" 2>/dev/null; then
-        echo "  生成完了。ファイル分割中..."
+    if echo "$PROMPT" | $CLAUDE_CMD -p > "$OUTPUT_FILE" 2>"$OUTPUT_FILE.err"; then
+        OUT_LINES=$(wc -l < "$OUTPUT_FILE" | tr -d ' ')
+        echo "  生成完了 ($OUT_LINES 行)。ファイル分割中..."
     else
-        echo "  [ERROR] Claude CLI実行失敗。スキップ。"
-        notify_slack ":warning: Tips自動補充: $CATEGORY のClaude CLI実行に失敗しました"
+        ERR_MSG=$(head -3 "$OUTPUT_FILE.err" 2>/dev/null || echo "(no stderr)")
+        echo "  [ERROR] Claude CLI実行失敗: $ERR_MSG"
+        notify_slack ":warning: Tips自動補充: $CATEGORY のClaude CLI実行失敗\n$ERR_MSG"
+        rm -f "$OUTPUT_FILE.err"
         continue
     fi
+    rm -f "$OUTPUT_FILE.err"
 
     # === Step 5: 出力をファイルに分割 ===
     FILE_COUNT=0

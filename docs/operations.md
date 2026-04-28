@@ -1,6 +1,6 @@
 # 運用ガイド
 
-日常の運用手順とトラブルシューティングをまとめています。
+ローカルcronベースの配信運用とトラブルシューティングをまとめています。
 
 ## 配信スケジュール
 
@@ -8,236 +8,215 @@
 |-----------|---------|------|
 | 9:00 | engineer | エンジニア向け |
 | 12:00 | consultant | コンサルタント向け |
+| 15:00 | tools | AIツール活用（Claude/Cursor/Gemini等） |
 | 18:00 | backoffice | バックオフィス向け |
 
-## cron-job.org 設定
+## アーキテクチャ
 
-定期実行は [cron-job.org](https://cron-job.org/) を使用してGitHub APIを呼び出します。
+```
+┌─────────────┐
+│ ローカルcron │─┬─▶ post-tips-local.sh ─▶ obsidian-sns-data ─▶ Slack
+│   (Mac)     │ │   (4回/日 配信)
+│             │ │
+│             │ ├─▶ tips-status-notify.sh ─▶ Slack（残数アラート）
+│             │ │   (毎朝7:30 残数監視)
+│             │ │
+│             │ └─▶ tips-auto-replenish.sh ─▶ claude CLI ─▶ obsidian-sns-data
+│             │     (毎週月曜8:00 補充)
+└─────────────┘
 
-### 前提条件
-
-1. **GitHub PAT (Fine-grained token)** が必要
-   - https://github.com/settings/tokens?type=beta
-   - Repository access: `slack-ai-tips-bot`, `obsidian-sns-data`
-   - Permissions: Contents (Read and write)
-
-2. **DATA_REPO_PAT** シークレットを設定
-   - https://github.com/takuya86/slack-ai-tips-bot/settings/secrets/actions
-   - Name: `DATA_REPO_PAT`
-   - Value: 上記で作成したPAT
-
-### cron-job.org でのジョブ設定
-
-#### 共通設定
-
-| 項目 | 値 |
-|-----|-----|
-| URL | `https://api.github.com/repos/takuya86/slack-ai-tips-bot/actions/workflows/post-tips.yml/dispatches` |
-| Request method | POST |
-
-**Headers:**
-
-| Key | Value |
-|-----|-------|
-| Authorization | `Bearer github_pat_xxxxx...` |
-| Content-Type | `application/json` |
-| Accept | `application/vnd.github+json` |
-
-#### ジョブ1: エンジニア向け (9:00 JST)
-
-| 項目 | 値 |
-|-----|-----|
-| Title | `AI Tips - Engineer` |
-| Schedule | `0 0 * * *` (00:00 UTC) |
-| Request body | `{"ref":"main","inputs":{"category":"engineer"}}` |
-
-#### ジョブ2: コンサルタント向け (12:00 JST)
-
-| 項目 | 値 |
-|-----|-----|
-| Title | `AI Tips - Consultant` |
-| Schedule | `0 3 * * *` (03:00 UTC) |
-| Request body | `{"ref":"main","inputs":{"category":"consultant"}}` |
-
-#### ジョブ3: バックオフィス向け (18:00 JST)
-
-| 項目 | 値 |
-|-----|-----|
-| Title | `AI Tips - Backoffice` |
-| Schedule | `0 9 * * *` (09:00 UTC) |
-| Request body | `{"ref":"main","inputs":{"category":"backoffice"}}` |
-
-#### ジョブ4: 週次リマインダー (月曜 10:00 JST)
-
-| 項目 | 値 |
-|-----|-----|
-| Title | `AI Tips - Weekly Reminder` |
-| URL | `https://api.github.com/repos/takuya86/slack-ai-tips-bot/actions/workflows/weekly-reminder.yml/dispatches` |
-| Schedule | `0 1 * * 1` (01:00 UTC, Monday) |
-| Request body | `{"ref":"main"}` |
-
-### テスト方法
-
-```bash
-curl -X POST \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer YOUR_PAT" \
-  -H "Content-Type: application/json" \
-  https://api.github.com/repos/takuya86/slack-ai-tips-bot/actions/workflows/post-tips.yml/dispatches \
-  -d '{"ref":"main","inputs":{"category":"engineer"}}'
+[フェイルオーバー]
+GitHub Actions の post-tips.yml は workflow_dispatch のみ残存。
+ローカル障害時に手動実行可能。
 ```
 
-成功時は HTTP 204 が返ります。
+## crontab エントリ
+
+```cron
+# === Slack AI Tips Bot ===
+# 配信（4回/日 JST）
+0 9 * * *  /Users/takuyakawase/development/slack-ai-tips-bot/scripts/post-tips-local.sh engineer
+0 12 * * * /Users/takuyakawase/development/slack-ai-tips-bot/scripts/post-tips-local.sh consultant
+0 15 * * * /Users/takuyakawase/development/slack-ai-tips-bot/scripts/post-tips-local.sh tools
+0 18 * * * /Users/takuyakawase/development/slack-ai-tips-bot/scripts/post-tips-local.sh backoffice
+# 残数監視（毎朝7:30、不足時のみ通知）
+30 7 * * * /Users/takuyakawase/development/slack-ai-tips-bot/scripts/tips-status-notify.sh
+# 自動補充（毎週月曜 8:00）
+0 8 * * 1 /Users/takuyakawase/development/slack-ai-tips-bot/scripts/tips-auto-replenish.sh
+```
+
+## 前提条件
+
+### 1. macOS環境
+
+- Macが配信時刻に起動・スリープ解除されていること
+- スリープが心配なら `caffeinate` で抑止: `caffeinate -i &`
+
+### 2. 認証情報
+
+| 項目 | 設定方法 |
+|-----|---------|
+| `SLACK_WEBHOOK_URL` | プロジェクトの `.env` に記載 |
+| GitHub認証 | `gh auth login` で `takuya86` アカウント認証済みであること |
+| Claude CLI | `claude` コマンドが動作すること（補充用） |
+
+### 3. 必須コマンド
+
+```bash
+which gh          # → /opt/homebrew/bin/gh
+which git
+which claude      # → ~/.local/bin/claude
+ls .venv/bin/python  # Python仮想環境
+```
+
+## 移行（GHA→ローカルcron）チェックリスト
+
+- [x] `scripts/post-tips-local.sh` 作成
+- [x] `scripts/tips-status-notify.sh` 作成
+- [x] `scripts/tips-auto-replenish.sh` 修正（cron環境対応）
+- [x] crontab 登録
+- [x] `weekly-reminder.yml` 削除
+- [x] `post-tips.yml` を `workflow_dispatch` のみに変更
+- [ ] **cron-job.org 側のジョブ停止**（ユーザー作業 - 後述）
+
+### cron-job.org の設定変更（要ユーザー作業）
+
+ローカルcron稼働後は cron-job.org 側のジョブを**停止**してください（二重配信防止）。
+
+1. https://cron-job.org/en/members/jobs/ にログイン
+2. 以下のジョブを **無効化** または **削除**
+   - `AI Tips - Engineer`
+   - `AI Tips - Consultant`
+   - `AI Tips - Backoffice`
+   - `AI Tips - Tools`
+   - `AI Tips - Weekly Reminder`
+
+ローカル障害時はGitHub Actionsから手動実行可能（`workflow_dispatch`）。
 
 ## 日常運用
 
 ### 配信状況の確認
 
-1. [GitHub Actions](https://github.com/takuya86/slack-ai-tips-bot/actions) を開く
-2. 「Post AI Tips to Slack」ワークフローを確認
-3. 緑チェック = 成功 / 赤バツ = 失敗
+```bash
+# ログ確認
+tail -50 ~/.claude/logs/post-tips-local.log
+tail -50 ~/.claude/logs/tips-status-notify.log
+tail -50 ~/.claude/logs/tips-auto-replenish.log
+```
 
 ### 手動配信
 
-1. GitHub Actions → 「Post AI Tips to Slack」
-2. 「Run workflow」をクリック
-3. カテゴリを選択（空欄でランダム）
-4. 「Run workflow」実行
+```bash
+# 任意のカテゴリで即配信
+bash scripts/post-tips-local.sh engineer
+bash scripts/post-tips-local.sh consultant
+bash scripts/post-tips-local.sh tools
+bash scripts/post-tips-local.sh backoffice
+```
 
 ### Tips残数の確認
 
-Tipsデータは [obsidian-sns-data/ai-tips](https://github.com/takuya86/obsidian-sns-data/tree/main/ai-tips) で管理しています。
-
 ```bash
-# Obsidian (Markdown) から確認
-git clone https://github.com/takuya86/obsidian-sns-data.git /tmp/data
-grep -r "used_count: 0" /tmp/data/ai-tips/engineer/ | wc -l  # エンジニア未使用数
-grep -r "used_count: 0" /tmp/data/ai-tips/consultant/ | wc -l  # コンサル未使用数
-grep -r "used_count: 0" /tmp/data/ai-tips/backoffice/ | wc -l  # バックオフィス未使用数
+# Slackに即通知（強制）
+bash scripts/tips-status-notify.sh --force-alert
 ```
 
-### 週次タスク
+### 手動補充
 
-毎週月曜に週次リマインダーがDMで届きます。
-
-1. 最新のAI活用事例をWeb検索
-2. 各カテゴリに1-2件のTipsを追加
-3. コミット・プッシュ
-
-詳細: [Tips追加ガイド](./tips-guide.md)
+```bash
+# 在庫不足時に即実行
+bash scripts/tips-auto-replenish.sh
+```
 
 ## トラブルシューティング
 
 ### 配信されない
 
 **確認項目:**
-1. GitHub Actionsが有効か
-   - Settings → Actions → General → 「Allow all actions」
-2. スケジュール実行が動いているか
-   - リポジトリが60日以上非アクティブだと無効化される
-   - 解決: 何かコミットをプッシュする
-3. Secretsが設定されているか
-   - Settings → Secrets → `SLACK_WEBHOOK_URL`
+1. crontabが登録されているか: `crontab -l | grep post-tips-local`
+2. Macがスリープしていないか
+3. `.env` の `SLACK_WEBHOOK_URL` が有効か
+4. 直近のログ: `tail -100 ~/.claude/logs/post-tips-local.log`
 
 ### エラー: SLACK_WEBHOOK_URL is required
 
-**原因:** GitHub SecretsにWebhook URLが設定されていない
+`.env` ファイルが読まれていない可能性。
 
-**解決:**
-1. Settings → Secrets and variables → Actions
-2. 「New repository secret」
-3. Name: `SLACK_WEBHOOK_URL`
-4. Value: Slack Webhook URL
+```bash
+# .envを確認
+cat /Users/takuyakawase/development/slack-ai-tips-bot/.env | grep SLACK_WEBHOOK_URL
+```
+
+### エラー: GitHub認証失敗
+
+```bash
+# gh CLIアカウントを確認
+gh auth status
+# takuya86 アカウントが認証済みであることを確認
+
+# 切り替え
+gh auth switch -u takuya86
+```
 
 ### エラー: No tips found for category
 
-**原因:** 指定カテゴリのTipsが枯渇（全て配信済み）
+カテゴリのTipsが枯渇しています。
 
-**解決:**
-1. 新しいTipsを追加する
-2. または `used_count` をリセット:
 ```bash
-python -c "
-import json
-with open('data/tips.json', 'r+') as f:
-    data = json.load(f)
-    for tip in data['tips']:
-        if tip['category'] == 'engineer':  # 対象カテゴリ
-            tip['used_count'] = 0
-    f.seek(0)
-    json.dump(data, f, ensure_ascii=False, indent=2)
-    f.truncate()
-"
+# 即補充
+bash scripts/tips-auto-replenish.sh
+
+# 残数確認
+bash scripts/tips-status-notify.sh --force-alert
 ```
 
-### RSS記事が取得できない
+### 補充スクリプトが「clone中...」で止まる
 
-**原因:** フィードURLの変更・サイトの障害
+cron経由でのGitHub認証問題（よくあるトラブル）。
 
 **確認:**
 ```bash
-# 特定フィードをテスト
-curl -s "https://zenn.dev/topics/ai/feed" | head -20
+# cron相当の最小環境で再現確認
+env -i HOME="$HOME" USER="$USER" PATH="/usr/bin:/bin" bash scripts/tips-auto-replenish.sh
 ```
 
-**解決:**
-- `config/rss_feeds.yaml` でURLを更新
-- 取得できないフィードを一時的に無効化
+**解決:** `gh auth status` で `takuya86` がログイン済みか確認。
 
 ### Slack投稿が失敗する
 
-**確認項目:**
-1. Webhook URLが有効か（Slack Appが削除されていないか）
-2. チャンネルが存在するか
-3. Appがチャンネルに招待されているか
-
-**テスト:**
 ```bash
-curl -X POST -H 'Content-type: application/json' \
+# Webhook URLをテスト
+source .env && curl -X POST -H 'Content-type: application/json' \
   --data '{"text":"テスト投稿"}' \
-  YOUR_WEBHOOK_URL
+  "$SLACK_WEBHOOK_URL"
 ```
 
 ## モニタリング
 
-### 配信ログの確認
+### ログファイル
 
-GitHub Actions → 該当のワークフロー実行 → 「Post tips」ステップ
+| ログ | 内容 |
+|-----|-----|
+| `~/.claude/logs/post-tips-local.log` | 配信履歴 |
+| `~/.claude/logs/tips-status-notify.log` | 残数監視履歴 |
+| `~/.claude/logs/tips-auto-replenish.log` | 補充履歴 |
 
-ログ例:
+### 失敗通知
+
+スクリプトは失敗時にSlack Webhook経由で自動通知します（`on_error` trap）。
+
+通知例:
 ```
-Selected tip: 【事例】LINEヤフー... (ID: eng-001)
-Fetched 3 articles
-Successfully posted to Slack
-```
-
-### 失敗通知の設定（任意）
-
-`.github/workflows/post-tips.yml` に追加:
-```yaml
-- name: Notify on failure
-  if: failure()
-  run: |
-    curl -X POST https://slack.com/api/chat.postMessage \
-      -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
-      -d "channel=$SLACK_USER_ID" \
-      -d "text=⚠️ Tips配信が失敗しました"
+:x: Tips配信失敗 (category=engineer, line=42, exit=1)
+詳細: ~/.claude/logs/post-tips-local.log
 ```
 
 ## バックアップ
 
-### tips.jsonのバックアップ
+Tipsデータは `obsidian-sns-data` リポジトリで Git管理されているため、すべての変更履歴がバックアップされます。
 
 ```bash
-cp data/tips.json data/tips.json.backup.$(date +%Y%m%d)
+# 直近のTips変更を確認
+git -C /tmp/work clone --depth 50 https://github.com/takuya86/obsidian-sns-data.git
+git -C /tmp/work log --oneline ai-tips/
 ```
-
-### 定期バックアップ（推奨）
-
-GitHub上にあるため、コミット履歴がバックアップになります。
-重要な変更前には必ずコミットしてください。
-
-## 問い合わせ先
-
-- リポジトリ: https://github.com/takuya86/slack-ai-tips-bot
-- Issues: https://github.com/takuya86/slack-ai-tips-bot/issues

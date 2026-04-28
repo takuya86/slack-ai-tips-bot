@@ -1,69 +1,103 @@
 # Slack AI Tips Bot
 
-SlackにAI活用のヒントと最新記事を自動投稿するBot
+SlackにAI活用Tipsと最新記事を自動配信するBot（**ローカルcron運用**）。
 
 ## 概要
 
-- 毎日12:00/19:00にAI活用Tipsを自動投稿
-- エンジニア/コンサル/バックオフィス向けにカテゴライズ
-- RSS経由で最新のAI関連記事も配信
+- 毎日4回（9/12/15/18時 JST）にカテゴリ別AI活用Tipsを配信
+- エンジニア/コンサルタント/AIツール活用/バックオフィス向け
+- RSS経由で最新AI記事も同時配信
+- **claude CLI で Tips自動補充**（毎週月曜）
+- **残数監視 + Slack通知**（毎朝）
 
-## 構成
+## アーキテクチャ
 
 ```
-GitHub Actions (cron) → Python → Slack Webhook
+ローカルcron (Mac)
+  ├─ 9:00  post-tips-local.sh engineer    ─┐
+  ├─ 12:00 post-tips-local.sh consultant  ─┤
+  ├─ 15:00 post-tips-local.sh tools       ─┼─▶ src/main.py ─▶ Slack
+  ├─ 18:00 post-tips-local.sh backoffice  ─┘
+  ├─ 7:30  tips-status-notify.sh             ─▶ Slack（残数アラート）
+  └─ 月曜8:00 tips-auto-replenish.sh         ─▶ claude CLI ─▶ obsidian-sns-data
 ```
+
+データソース: [obsidian-sns-data](https://github.com/takuya86/obsidian-sns-data) (private)
 
 ## セットアップ
 
-### 1. Slack Webhook URL取得
+### 1. 認証
 
-1. [Slack API](https://api.slack.com/apps) でApp作成
-2. Incoming Webhooks を有効化
-3. Webhook URLをコピー
-
-### 2. GitHub Secrets設定
-
-```
-SLACK_WEBHOOK_URL: <取得したWebhook URL>
+```bash
+gh auth login          # takuya86アカウント
+claude --version       # Claude CLI 動作確認
 ```
 
-### 3. チャンネル作成
+### 2. .env 設定
 
-Slackで `#ai-tips` チャンネルを作成
+```bash
+echo "SLACK_WEBHOOK_URL=https://hooks.slack.com/services/..." > .env
+```
+
+### 3. Python仮想環境
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+### 4. crontab登録
+
+```cron
+# 配信
+0 9 * * *  /path/to/scripts/post-tips-local.sh engineer
+0 12 * * * /path/to/scripts/post-tips-local.sh consultant
+0 15 * * * /path/to/scripts/post-tips-local.sh tools
+0 18 * * * /path/to/scripts/post-tips-local.sh backoffice
+# 残数監視
+30 7 * * * /path/to/scripts/tips-status-notify.sh
+# 自動補充
+0 8 * * 1  /path/to/scripts/tips-auto-replenish.sh
+```
 
 ## 使い方
 
-### 自動実行
-
-毎日12:00と19:00（JST）に自動投稿
-
-### 手動実行
-
-GitHub Actions → Run workflow
-
-### Tips追加
-
+### 手動配信
 ```bash
-# data/tips.json を編集してpush
-git add data/tips.json
-git commit -m "Add new tips"
-git push
+bash scripts/post-tips-local.sh engineer
 ```
 
-## ディレクトリ構成
+### 残数確認
+```bash
+bash scripts/tips-status-notify.sh --force-alert
+```
 
+### 手動補充
+```bash
+bash scripts/tips-auto-replenish.sh
 ```
-├── .github/workflows/  # GitHub Actions
-├── src/                # Pythonスクリプト
-├── data/               # Tips データ（JSON）
-├── config/             # 設定ファイル
-└── docs/               # ドキュメント
-```
+
+## スクリプト一覧
+
+| スクリプト | 役割 |
+|---|---|
+| `post-tips-local.sh` | Tips配信（ローカルcron用） |
+| `tips-status-notify.sh` | 残数監視＆Slack通知 |
+| `tips-auto-replenish.sh` | claude CLIでTips自動生成・補充 |
+| `dispatch-tips.sh` | （旧）GHA発火用、現在は使用しない |
 
 ## ドキュメント
 
+- [運用ガイド](docs/operations.md) - crontab/トラブルシューティング
+- [Tips追加ガイド](docs/tips-guide.md) - 手動追加時の品質基準
 - [要件定義書](docs/requirements.md)
+- [アーキテクチャ](docs/architecture.md)
+
+## フェイルオーバー
+
+ローカル障害時はGitHub Actionsから手動実行可能:
+- https://github.com/takuya86/slack-ai-tips-bot/actions/workflows/post-tips.yml
+- 「Run workflow」→ カテゴリ選択
 
 ## ライセンス
 
