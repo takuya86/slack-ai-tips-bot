@@ -14,17 +14,17 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 LOG_DIR="$HOME/.claude/logs"
 LOG_FILE="$LOG_DIR/tips-auto-replenish.log"
-SLACK_WEBHOOK="${SLACK_WEBHOOK_URL:-}"
 CLAUDE_CMD="${CLAUDE_CMD:-claude}"
 DATE_TODAY=$(date +%Y-%m-%d)
 
-# .env読み込み（SLACK_WEBHOOK_URL等）
+# .env読み込み
 if [ -f "$PROJECT_DIR/.env" ]; then
     set -a
     source "$PROJECT_DIR/.env"
     set +a
-    SLACK_WEBHOOK="${SLACK_WEBHOOK:-${SLACK_WEBHOOK_URL:-}}"
 fi
+# 運用通知は ops Webhook 優先、未設定時は通常 Webhook にフォールバック
+SLACK_WEBHOOK="${SLACK_OPS_WEBHOOK_URL:-${SLACK_WEBHOOK_URL:-}}"
 
 # === ログ設定 ===
 mkdir -p "$LOG_DIR"

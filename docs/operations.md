@@ -54,11 +54,18 @@ GitHub Actions の post-tips.yml は workflow_dispatch のみ残存。
 
 ### 2. 認証情報
 
-| 項目 | 設定方法 |
-|-----|---------|
-| `SLACK_WEBHOOK_URL` | プロジェクトの `.env` に記載 |
-| GitHub認証 | `gh auth login` で `takuya86` アカウント認証済みであること |
-| Claude CLI | `claude` コマンドが動作すること（補充用） |
+| 項目 | 用途 | 設定方法 |
+|-----|-----|---------|
+| `SLACK_WEBHOOK_URL` | **Tips配信用**（公開チャンネル） | `.env` に記載 |
+| `SLACK_OPS_WEBHOOK_URL` | **運用通知用**（残数アラート/補充完了/エラー） | `.env` に記載（任意・未設定時は配信用にフォールバック） |
+| GitHub認証 | データリポへのアクセス | `gh auth login` で `takuya86` アカウント認証済みであること |
+| Claude CLI | 補充時のTips生成 | `claude` コマンドが動作すること |
+
+**`.env` サンプル:**
+```bash
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/.../配信用
+SLACK_OPS_WEBHOOK_URL=https://hooks.slack.com/services/.../運用通知用
+```
 
 ### 3. 必須コマンド
 

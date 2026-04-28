@@ -30,7 +30,8 @@ if [ -f "$PROJECT_DIR/.env" ]; then
     source "$PROJECT_DIR/.env"
     set +a
 fi
-SLACK_WEBHOOK="${SLACK_WEBHOOK_URL:-}"
+# 運用通知は ops Webhook 優先、未設定時は通常 Webhook にフォールバック
+SLACK_WEBHOOK="${SLACK_OPS_WEBHOOK_URL:-${SLACK_WEBHOOK_URL:-}}"
 
 # === ログ ===
 mkdir -p "$LOG_DIR"

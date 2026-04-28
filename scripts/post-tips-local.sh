@@ -33,11 +33,13 @@ echo "=========================================="
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Tips配信開始 (category=${CATEGORY:-random})"
 echo "=========================================="
 
-# === Slack通知 ===
+# === Slack通知（運用通知用、配信本体は src/main.py が直接 SLACK_WEBHOOK_URL を使う） ===
 notify_slack() {
     local message="$1"
-    if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
-        curl -s -X POST "$SLACK_WEBHOOK_URL" \
+    # 運用通知は ops Webhook 優先、未設定時は通常 Webhook にフォールバック
+    local webhook="${SLACK_OPS_WEBHOOK_URL:-${SLACK_WEBHOOK_URL:-}}"
+    if [ -n "$webhook" ]; then
+        curl -s -X POST "$webhook" \
             -H 'Content-type: application/json' \
             -d "$(printf '%s' "$message" | python3 -c 'import json,sys; print(json.dumps({"text": sys.stdin.read()}))')" \
             > /dev/null 2>&1 || true
