@@ -15,6 +15,8 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 LOG_DIR="$HOME/.claude/logs"
 LOG_FILE="$LOG_DIR/tips-auto-replenish.log"
 CLAUDE_CMD="${CLAUDE_CMD:-claude}"
+PYTHON_CMD="${PYTHON_CMD:-$PROJECT_DIR/.venv/bin/python}"
+[ -x "$PYTHON_CMD" ] || PYTHON_CMD="python3"
 DATE_TODAY=$(date +%Y-%m-%d)
 
 # .env読み込み
@@ -249,6 +251,15 @@ for CATEGORY in "${NEEDS_REPLENISH[@]}"; do
     fi
 
     echo "  $FILE_COUNT 件のTipsファイルを作成"
+
+    # 生成ファイルを正規化（コードブロックラップ除去・YAML検証）
+    if [ "$FILE_COUNT" -gt 0 ]; then
+        echo "  ファイル正規化中..."
+        VALID_COUNT=$( "$PYTHON_CMD" "$SCRIPT_DIR/normalize-tips.py" "$TIPS_DIR/$CATEGORY/${PREFIX}-"*.md 2>&1 | tee /dev/stderr | grep -oE 'valid=[0-9]+' | cut -d= -f2 || echo "$FILE_COUNT")
+        FILE_COUNT="$VALID_COUNT"
+        echo "  正規化後: $FILE_COUNT 件"
+    fi
+
     GENERATED_CATEGORIES+=("$CATEGORY")
     GENERATED_COUNTS+=("$FILE_COUNT")
 
