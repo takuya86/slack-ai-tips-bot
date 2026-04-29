@@ -64,12 +64,16 @@ on_error() {
 }
 trap 'on_error $LINENO' ERR
 
-# === Tipsデータ取得 ===
-GH_TOKEN=$(gh auth token --user "$DATA_REPO_OWNER" 2>&1) || {
-    echo "[ERROR] gh auth token 失敗"
-    notify_slack ":x: Tips残数監視: GitHub認証失敗"
+# === Tipsデータ取得（.env優先、フォールバックでgh CLI） ===
+GH_TOKEN="${GITHUB_TOKEN_DATA_REPO:-}"
+if [ -z "$GH_TOKEN" ]; then
+    GH_TOKEN=$(gh auth token --user "$DATA_REPO_OWNER" 2>/dev/null || true)
+fi
+if [ -z "$GH_TOKEN" ]; then
+    echo "[ERROR] GitHubトークン取得失敗"
+    notify_slack ":x: Tips残数監視: GitHub認証失敗（.env に GITHUB_TOKEN_DATA_REPO を設定）"
     exit 1
-}
+fi
 
 GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 \
     "https://${GH_TOKEN}@github.com/${DATA_REPO_OWNER}/${DATA_REPO_NAME}.git" \

@@ -5,11 +5,14 @@ JSON形式とMarkdown形式の両方に対応
 """
 
 import json
+import logging
 import random
 import re
 import yaml
 from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 class TipsSelector:
@@ -59,12 +62,16 @@ class TipsSelector:
                     self.tips.append(tip)
 
     def _parse_markdown_file(self, file_path: Path) -> Optional[dict]:
-        """Markdownファイルをパースしてdict形式に変換"""
+        """Markdownファイルをパースしてdict形式に変換
+
+        破損ファイル（フロントマター無し/YAMLエラー/dict以外）は警告ログを出してスキップ
+        """
         content = file_path.read_text(encoding="utf-8")
 
         # YAMLフロントマターを抽出
         frontmatter_match = re.match(r'^---\n(.*?)\n---\n(.*)$', content, re.DOTALL)
         if not frontmatter_match:
+            logger.warning(f"Skipping {file_path.name}: no frontmatter")
             return None
 
         yaml_content = frontmatter_match.group(1)
@@ -72,7 +79,12 @@ class TipsSelector:
 
         try:
             metadata = yaml.safe_load(yaml_content)
-        except yaml.YAMLError:
+        except yaml.YAMLError as e:
+            logger.warning(f"Skipping {file_path.name}: YAML parse error - {e}")
+            return None
+
+        if not isinstance(metadata, dict):
+            logger.warning(f"Skipping {file_path.name}: frontmatter is not a dict (got {type(metadata).__name__})")
             return None
 
         return {

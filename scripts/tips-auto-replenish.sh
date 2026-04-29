@@ -62,14 +62,18 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# === Step 1: データ取得（GitHub認証付き） ===
-# 注: gh CLIに複数アカウントある場合、--user で takuya86 を明示指定
+# === Step 1: データ取得（.env優先、フォールバックでgh CLI） ===
+# 注: cron環境ではmacOS keychainにアクセスできないため .env のtokenを優先
 echo "[INFO] GitHub認証Token取得中..."
-GH_TOKEN=$(gh auth token --user "$DATA_REPO_OWNER" 2>&1) || {
-    echo "[ERROR] gh auth token --user $DATA_REPO_OWNER 失敗: $GH_TOKEN" >&2
-    notify_slack ":x: Tips自動補充: GitHub認証失敗。\`gh auth login\` を確認してください"
+GH_TOKEN="${GITHUB_TOKEN_DATA_REPO:-}"
+if [ -z "$GH_TOKEN" ]; then
+    GH_TOKEN=$(gh auth token --user "$DATA_REPO_OWNER" 2>/dev/null || true)
+fi
+if [ -z "$GH_TOKEN" ]; then
+    echo "[ERROR] GitHubトークン取得失敗" >&2
+    notify_slack ":x: Tips自動補充: GitHub認証失敗（.env に GITHUB_TOKEN_DATA_REPO を設定）"
     exit 1
-}
+fi
 DATA_REPO_URL="https://${GH_TOKEN}@github.com/${DATA_REPO_OWNER}/${DATA_REPO_NAME}.git"
 
 echo "[INFO] obsidian-sns-data をclone中..."

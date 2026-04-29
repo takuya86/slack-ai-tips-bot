@@ -60,9 +60,17 @@ trap 'on_error $LINENO' ERR
 cleanup() { rm -rf "$WORK_DIR"; }
 trap cleanup EXIT
 
-# === GitHub認証 ===
+# === GitHub認証（.env優先、フォールバックでgh CLI） ===
+# 注: cron環境ではmacOS keychainにアクセスできないため .env のtokenを優先
 echo "[INFO] GitHub認証..."
-GH_TOKEN=$(gh auth token --user "$DATA_REPO_OWNER")
+GH_TOKEN="${GITHUB_TOKEN_DATA_REPO:-}"
+if [ -z "$GH_TOKEN" ]; then
+    GH_TOKEN=$(gh auth token --user "$DATA_REPO_OWNER" 2>/dev/null || true)
+fi
+if [ -z "$GH_TOKEN" ]; then
+    echo "[ERROR] GitHubトークンが取得できません。.env に GITHUB_TOKEN_DATA_REPO を設定してください" >&2
+    exit 1
+fi
 
 # === データclone ===
 echo "[INFO] データclone..."
