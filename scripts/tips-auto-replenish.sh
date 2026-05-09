@@ -79,7 +79,27 @@ fi
 DATA_REPO_URL="https://${GH_TOKEN}@github.com/${DATA_REPO_OWNER}/${DATA_REPO_NAME}.git"
 
 echo "[INFO] obsidian-sns-data をclone中..."
-GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 "$DATA_REPO_URL" "$WORK_DIR"
+# ネットワーク未接続時（cron早朝Wi-Fi未起動など）に備えてリトライ
+clone_with_retry() {
+    local max=5
+    local i=1
+    while [ "$i" -le "$max" ]; do
+        if GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 "$DATA_REPO_URL" "$WORK_DIR" 2>&1; then
+            return 0
+        fi
+        rm -rf "$WORK_DIR"
+        local wait=$((i * 60))
+        echo "[WARN] clone失敗 ($i/$max)、${wait}秒後にリトライ..."
+        sleep "$wait"
+        i=$((i + 1))
+    done
+    return 1
+}
+if ! clone_with_retry; then
+    echo "[ERROR] $max回リトライしてもclone失敗。中止" >&2
+    notify_slack ":x: Tips自動補充: ネットワーク未接続でclone失敗（5回リトライ後）"
+    exit 1
+fi
 
 TIPS_DIR="$WORK_DIR/ai-tips"
 
