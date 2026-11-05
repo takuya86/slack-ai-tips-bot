@@ -121,15 +121,55 @@ feeds:
       priority: 6
       lang: en
 
+# AI 関連のセキュリティ記事（📰 の下に 🔐 で最大1件。Tips のカテゴリではない）
+# common は混ぜない。settings.security_keywords に合う記事だけを出す
+  security:
+    - name: JPCERT/CC
+      url: https://www.jpcert.or.jp/rss/jpcert.rdf
+      lang: ja
+
+    - name: IPA 重要なセキュリティ情報
+      url: https://www.ipa.go.jp/security/alert-rss.rdf
+      lang: ja
+
+    - name: Security NEXT
+      url: https://www.security-next.com/feed
+      lang: ja
+
+    - name: The Hacker News
+      url: https://feeds.feedburner.com/TheHackersNews
+      lang: en
+
 settings:
   # 1投稿あたりの最大記事数
   max_articles: 3
 
   # フィード取得タイムアウト（秒）
-  timeout_seconds: 10
+  timeout_seconds: 5
 
   # キャッシュ時間（時間）- 将来の拡張用
   cache_hours: 6
 
   # 記事の最大日数（これより古い記事は除外）
   max_age_days: 7
+
+  # セキュリティ記事を AI 関連に絞るキーワード（タイトル＋概要で照合）
+  # 英字だけのものは単語として照合（"AI" は "Rails" に当たらない）、日本語は部分一致
+  security_keywords:
+    - AI
+    - LLM
+    - 生成AI
+    - 人工知能
+    - ChatGPT
+    - Claude
+    - Gemini
+    - Copilot
+    - OpenAI
+    - Anthropic
+    - MCP
+    - プロンプト
+    - prompt injection
+    - エージェント
+    - agent
+    - deepfake
+    - ディープフェイク

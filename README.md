@@ -7,6 +7,7 @@ SlackにAI活用Tipsと最新記事を自動配信するBot（**ローカルcron
 - 毎日4回（9/12/15/18時 JST）にカテゴリ別AI活用Tipsを配信
 - エンジニア/コンサルタント/AIツール活用/バックオフィス向け
 - RSS経由で最新AI記事も同時配信
+- AI関連のセキュリティ記事（JPCERT/CC・IPA・Security NEXT・The Hacker News）があれば 🔐 で1件添える
 - **claude CLI で Tips自動補充**（毎週月曜）
 - **残数監視 + Slack通知**（毎朝）
 

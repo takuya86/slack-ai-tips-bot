@@ -12,10 +12,33 @@ from pathlib import Path
 from typing import Optional
 
 import feedparser
+import requests
 import yaml
 
 
 logger = logging.getLogger(__name__)
+
+USER_AGENT = "Slack AI Tips Bot/1.0"
+
+# 同じセキュリティ記事が1日4回出ないよう、配信枠ごとに候補をずらす
+SECURITY_SLOT_OFFSETS = {"engineer": 0, "consultant": 1, "tools": 2, "backoffice": 3}
+
+
+def matches_keywords(text: str, keywords: list[str]) -> bool:
+    """
+    キーワードのどれかを含むか
+
+    英字だけのキーワードは単語として照合する（"AI" が "Rails" に当たらないように）。
+    複数形の s は許す（agents, LLMs）。日本語を含むキーワードは部分一致。
+    """
+    for keyword in keywords:
+        if keyword.isascii():
+            pattern = rf"(?<![A-Za-z]){re.escape(keyword)}s?(?![A-Za-z])"
+            if re.search(pattern, text, flags=re.IGNORECASE):
+                return True
+        elif keyword in text:
+            return True
+    return False
 
 
 @dataclass
@@ -125,7 +148,59 @@ class RSSFetcher:
 
         return articles[:limit]
 
-    def _parse_feed(self, url: str, source: str, max_age_days: int, lang: str) -> list[Article]:
+    def fetch_security(self, category: str, exclude_urls: Optional[set[str]] = None) -> list[Article]:
+        """
+        AI 関連のセキュリティ記事を最大1件取得（common フィードは混ぜない）
+
+        候補は日本語優先→新しい順に並べ、配信枠ごとにずらして1件選ぶ。
+
+        Args:
+            category: 配信カテゴリ（候補をずらす位置に使う）
+            exclude_urls: 出さない記事の URL（同じ投稿の 📰 記事など）
+
+        Returns:
+            記事のリスト（0件か1件）
+        """
+        feeds = self.config.get("feeds", {}).get("security", [])
+        if not feeds:
+            return []
+
+        settings = self.config.get("settings", {})
+        max_age_days = settings.get("max_age_days", 7)
+        keywords = settings.get("security_keywords", [])
+        exclude_urls = exclude_urls or set()
+
+        candidates = []
+        for feed_info in feeds:
+            source = feed_info.get("name", "Unknown")
+            try:
+                feed_articles = self._parse_feed(
+                    feed_info.get("url"), source, max_age_days,
+                    feed_info.get("lang", "ja"), sort_by_date=True
+                )
+            except Exception as e:
+                logger.warning(f"Failed to fetch security feed {source}: {e}")
+                continue
+            matched = [
+                a for a in feed_articles
+                if a.url not in exclude_urls
+                and matches_keywords(f"{a.title} {a.description}", keywords)
+            ]
+            logger.info(f"Fetched {len(feed_articles)} security articles from {source} ({len(matched)} AI related)")
+            candidates.extend(matched)
+
+        if not candidates:
+            return []
+
+        candidates.sort(key=lambda x: (
+            0 if x.lang == "ja" else 1,
+            -self._parse_date(x.published).timestamp()
+        ))
+        offset = SECURITY_SLOT_OFFSETS.get(category, 0)
+        return [candidates[offset % len(candidates)]]
+
+    def _parse_feed(self, url: str, source: str, max_age_days: int, lang: str,
+                    sort_by_date: bool = False) -> list[Article]:
         """
         単一フィードをパース
 
@@ -134,14 +209,19 @@ class RSSFetcher:
             source: フィード名
             max_age_days: 記事の最大日数
             lang: 言語コード
+            sort_by_date: 先頭10件で切る前に新しい順に並べる（日付順でないフィード用）
 
         Returns:
             記事のリスト
         """
         timeout = self.config.get("settings", {}).get("timeout_seconds", 10)
 
-        # feedparserでパース
-        feed = feedparser.parse(url, agent="Slack AI Tips Bot/1.0")
+        response = requests.get(url, timeout=timeout, headers={"User-Agent": USER_AGENT})
+        response.raise_for_status()
+        feed = feedparser.parse(
+            response.content,
+            response_headers={"content-type": response.headers.get("Content-Type", "")}
+        )
 
         if feed.bozo:
             # パースエラー（bozo=1）でも一部データは取得できることがあるので警告のみ
@@ -150,7 +230,15 @@ class RSSFetcher:
         articles = []
         cutoff_date = datetime.now(timezone.utc) - timedelta(days=max_age_days)
 
-        for entry in feed.entries[:10]:  # 最新10件のみチェック
+        entries = feed.entries
+        if sort_by_date:
+            entries = sorted(
+                entries,
+                key=lambda e: self._parse_date(e.get("published", e.get("updated", ""))).timestamp(),
+                reverse=True
+            )
+
+        for entry in entries[:10]:  # 最新10件のみチェック
             try:
                 title = entry.get("title", "No Title")
                 link = entry.get("link", "")

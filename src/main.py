@@ -44,7 +44,7 @@ def main():
     parser.add_argument(
         "--category",
         type=str,
-        help="カテゴリを指定（engineer/consultant/backoffice）"
+        help="カテゴリを指定（engineer/consultant/tools/backoffice）"
     )
     args = parser.parse_args()
 
@@ -92,10 +92,19 @@ def main():
         articles = rss_fetcher.fetch(category, limit=Config.RSS_FETCH_LIMIT, tags=tip_tags)
         logger.info(f"Fetched {len(articles)} articles")
 
+        # AI 関連のセキュリティ記事（取得に失敗しても配信は続ける）
+        security_articles = []
+        try:
+            exclude_urls = {articles[0].url} if articles else set()
+            security_articles = rss_fetcher.fetch_security(category, exclude_urls=exclude_urls)
+        except Exception as e:
+            logger.warning(f"Failed to fetch security articles: {e}")
+        logger.info(f"Fetched {len(security_articles)} security articles")
+
         # 5. メッセージ組み立て
         logger.info("Building message...")
         message_builder = MessageBuilder()
-        message = message_builder.build(category, tip, articles)
+        message = message_builder.build(category, tip, articles, security_articles)
 
         # 6. Slack投稿（または表示のみ）
         if args.dry_run:
