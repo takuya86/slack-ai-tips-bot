@@ -214,8 +214,10 @@ for CATEGORY in "${NEEDS_REPLENISH[@]}"; do
             fi
         fi
     else
-        ERR_MSG=$(head -3 "$OUTPUT_FILE.err" 2>/dev/null || echo "(no stderr)")
-        echo "  [ERROR] Claude CLI実行失敗: $ERR_MSG"
+        # claude -p は認証切れ・利用上限などの理由を stdout に出すことがあるため両方残す
+        ERR_MSG=$( { grep -v 'ExperimentalWarning\|trace-warnings' "$OUTPUT_FILE.err"; head -c 500 "$OUTPUT_FILE"; } 2>/dev/null | head -5)
+        echo "  [ERROR] Claude CLI実行失敗: ${ERR_MSG:-(出力なし)}"
+        echo "  --- stdout (先頭20行) ---"; head -20 "$OUTPUT_FILE" 2>/dev/null; echo "  --- stderr ---"; cat "$OUTPUT_FILE.err" 2>/dev/null
         notify_slack ":warning: Tips自動補充: $CATEGORY のClaude CLI実行失敗\n$ERR_MSG"
         rm -f "$OUTPUT_FILE.err"
         continue

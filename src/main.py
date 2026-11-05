@@ -119,7 +119,7 @@ def main():
 
             # 使用回数をインクリメント
             logger.info("Updating used count...")
-            tips_selector.increment_used_count(tip.get("id"))
+            tips_selector.increment_used_count(tip)
 
         logger.info("✅ Successfully completed!")
 

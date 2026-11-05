@@ -43,6 +43,12 @@ def normalize(file_path: str) -> tuple[bool, str]:
     if not md.get("id"):
         return False, "no id field"
 
+    # IDはファイル名に揃える（生成AIが番号をずらして書くとIDが重複し、同じTipsが配信され続けるため）
+    if str(md["id"]) != p.stem:
+        content = re.sub(r'^id:.*$', f'id: "{p.stem}"', content, count=1, flags=re.MULTILINE)
+        p.write_text(content, encoding="utf-8")
+        print(f"[FIXED] {p.name}: id {md['id']} -> {p.stem}", file=sys.stderr)
+
     return True, "ok"
 
 

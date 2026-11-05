@@ -151,22 +151,20 @@ class TipsSelector:
 
         return selected
 
-    def increment_used_count(self, tip_id: str) -> None:
+    def increment_used_count(self, tip: dict) -> None:
         """
-        指定Tipsのused_countをインクリメント
-        ファイルを更新
+        select() で選んだTipsのused_countをインクリメントしてファイルを更新
+
+        IDで探し直すと、IDが重複した別ファイルを更新してしまうため、選んだdictをそのまま使う
 
         Args:
-            tip_id: TipsのID
+            tip: select() が返したTips
         """
-        for tip in self.tips:
-            if tip.get("id") == tip_id:
-                tip["used_count"] = tip.get("used_count", 0) + 1
-                if self.source_type == 'json':
-                    self._save_json()
-                else:
-                    self._save_markdown_file(tip)
-                break
+        tip["used_count"] = tip.get("used_count", 0) + 1
+        if self.source_type == 'json':
+            self._save_json()
+        else:
+            self._save_markdown_file(tip)
 
     def _save_json(self) -> None:
         """JSONファイルに書き込み"""
