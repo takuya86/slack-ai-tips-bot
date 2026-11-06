@@ -169,11 +169,12 @@ class SlackPoster:
         """Webhook URLを設定"""
         pass
 
-    def post(self, message: str) -> bool:
+    def post(self, message: str, blocks: list | None = None) -> bool:
         """
-        メッセージを投稿
+        メッセージを投稿（text は通知の文面、blocks は Block Kit の見た目）
         - 成功: True
         - 失敗: False + ログ出力
+        - 400 invalid_blocks: text だけで1回送り直す
         """
         pass
 ```

@@ -1,10 +1,15 @@
 """
 投稿メッセージ組み立て
-Markdown形式のメッセージを生成
+Markdown形式の文字列（通知プレビュー用）と Block Kit の blocks を生成
 """
 
 import re
 from typing import Optional
+
+
+SOURCE_LINE = re.compile(r"^🔗 参考: (https?://\S+)$")
+SECTION_TEXT_LIMIT = 3000
+HEADER_TEXT_LIMIT = 150
 
 
 class MessageBuilder:
@@ -79,6 +84,109 @@ class MessageBuilder:
             lines.append(f"   {sec.url}")
 
         return "\n".join(lines)
+
+    def build_blocks(self, category: str, tip: dict, articles: list, security_articles: Optional[list] = None) -> list:
+        """
+        Block Kit の blocks を組み立てる（見た目用。通知の文面は build() の文字列を使う）
+        """
+        config = self.CATEGORY_CONFIG.get(category, {"label": category, "icon": "🤖"})
+        blocks = [{
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": self._truncate(f"{config['icon']} {config['label']}向け AI Tips", HEADER_TEXT_LIMIT),
+                "emoji": True,
+            },
+        }]
+
+        title = tip.get("title") or "タイトルなし"
+        self._add_section(blocks, f"*{self._escape(title)}*")
+
+        parts = self._split_content(tip.get("content", ""))
+        self._add_section(blocks, "\n".join(self._escape(l) for l in parts["stats"]))
+        self._add_section(blocks, "\n".join(self._escape(l) for l in parts["points"]))
+        self._add_section(blocks, "\n".join(f"*{self._escape(l)}*" for l in parts["action"]))
+        if parts["source_url"]:
+            self._add_section(blocks, f"<{self._safe_url(parts['source_url'])}|🔗 出典を見る>")
+
+        tags = [t for t in tip.get("tags", []) if t]
+        if tags:
+            blocks.append(self._context(f"🏷️ `{self._escape(' / '.join(tags[:4]))}`"))
+
+        blocks.append({"type": "divider"})
+        blocks.append(self._context("💬 _試したことある？ →_ :white_check_mark: _やってみる →_ :eyes:"))
+        blocks.append({"type": "divider"})
+
+        if articles:
+            blocks.extend(self._article_blocks("📰 *最新記事*", articles[0]))
+        if security_articles:
+            blocks.extend(self._article_blocks("🔐 *セキュリティ*", security_articles[0]))
+
+        return blocks
+
+    def _split_content(self, content: str) -> dict:
+        """
+        本文を blocks 用に分ける（取り出す行は _compact_content と同じ）
+        🔗 参考 の行は URL だけ取り出し、本文からは外す
+        """
+        parts = {"stats": [], "points": [], "action": [], "source_url": None}
+        bullets = 0
+        for line in (content or "").split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("📊"):
+                parts["stats"].append(line)
+            elif line.startswith("💡"):
+                parts["points"].append(line)
+            elif line.startswith("- ") and bullets < 2:
+                parts["points"].append("• " + line[2:])
+                bullets += 1
+            elif line.startswith("🎯"):
+                parts["action"].append(line)
+            elif line.startswith("🔗"):
+                m = SOURCE_LINE.match(line)
+                if m and not parts["source_url"]:
+                    parts["source_url"] = m.group(1)
+                elif not m:
+                    parts["points"].append(line)
+        return parts
+
+    def _article_blocks(self, heading: str, article) -> list:
+        title = f"{article.title}（🇺🇸）" if article.lang == "en" else article.title
+        label = self._escape(title).replace("|", "｜")
+        blocks = []
+        self._add_section(blocks, f"{heading}\n<{self._safe_url(article.url)}|{label}>")
+        if article.source:
+            blocks.append(self._context(self._escape(article.source)))
+        return blocks
+
+    def _add_section(self, blocks: list, text: str) -> None:
+        """空の section は Slack に弾かれるので作らない"""
+        text = text.strip()
+        if text:
+            blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": self._truncate(text, SECTION_TEXT_LIMIT)}})
+
+    @staticmethod
+    def _context(text: str) -> dict:
+        return {"type": "context", "elements": [{"type": "mrkdwn", "text": text}]}
+
+    @staticmethod
+    def _escape(text: str) -> str:
+        """mrkdwn の制御文字（& < >）をエスケープ"""
+        return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    @staticmethod
+    def _safe_url(url: str) -> str:
+        """<url|ラベル> の区切りを壊す文字をパーセントエンコード"""
+        return url.replace("<", "%3C").replace(">", "%3E").replace("|", "%7C").replace(" ", "%20")
+
+    @staticmethod
+    def _truncate(text: str, limit: int) -> str:
+        if len(text) <= limit:
+            return text
+        cut = re.sub(r"&[a-z]*$", "", text[:limit - 1])
+        return cut + "…"
 
     def build_detail(self, tip: dict) -> str:
         """
