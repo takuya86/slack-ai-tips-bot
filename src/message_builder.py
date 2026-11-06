@@ -33,7 +33,6 @@ class MessageBuilder:
         改善ポイント:
         - メイン: 短くインパクト重視（スクロールせず読める）
         - 詳細は本文に含めつつもコンパクトに
-        - リアクション促進のCTAを追加
         """
         config = self.CATEGORY_CONFIG.get(category, {"label": category, "icon": "🤖"})
         category_label = config["label"]
@@ -64,10 +63,8 @@ class MessageBuilder:
             lines.append(f"🏷️ `{' / '.join(tags[:4])}`")
             lines.append("")
 
-        # --- CTA（リアクション促進） ---
-        lines.append("─" * 15)
-        lines.append("💬 _試したことある？ →_ :white_check_mark: _やってみる →_ :eyes:")
-        lines.append("")
+        if articles or security_articles:
+            lines.append("─" * 15)
 
         # --- 最新記事（1件だけ、シンプルに） ---
         if articles:
@@ -105,7 +102,6 @@ class MessageBuilder:
         parts = self._split_content(tip.get("content", ""))
         self._add_section(blocks, "\n".join(self._escape(l) for l in parts["stats"]))
         self._add_section(blocks, "\n".join(self._escape(l) for l in parts["points"]))
-        self._add_section(blocks, "\n".join(f"*{self._escape(l)}*" for l in parts["action"]))
         if parts["source_url"]:
             self._add_section(blocks, f"<{self._safe_url(parts['source_url'])}|🔗 出典を見る>")
 
@@ -113,9 +109,8 @@ class MessageBuilder:
         if tags:
             blocks.append(self._context(f"🏷️ `{self._escape(' / '.join(tags[:4]))}`"))
 
-        blocks.append({"type": "divider"})
-        blocks.append(self._context("💬 _試したことある？ →_ :white_check_mark: _やってみる →_ :eyes:"))
-        blocks.append({"type": "divider"})
+        if articles or security_articles:
+            blocks.append({"type": "divider"})
 
         if articles:
             blocks.extend(self._article_blocks("📰 *最新記事*", articles[0]))
@@ -129,7 +124,7 @@ class MessageBuilder:
         本文を blocks 用に分ける（取り出す行は _compact_content と同じ）
         🔗 参考 の行は URL だけ取り出し、本文からは外す
         """
-        parts = {"stats": [], "points": [], "action": [], "source_url": None}
+        parts = {"stats": [], "points": [], "source_url": None}
         bullets = 0
         for line in (content or "").split("\n"):
             line = line.strip()
@@ -142,8 +137,6 @@ class MessageBuilder:
             elif line.startswith("- ") and bullets < 2:
                 parts["points"].append("• " + line[2:])
                 bullets += 1
-            elif line.startswith("🎯"):
-                parts["action"].append(line)
             elif line.startswith("🔗"):
                 m = SOURCE_LINE.match(line)
                 if m and not parts["source_url"]:
@@ -212,7 +205,6 @@ class MessageBuilder:
 
         - 📊実績行を抽出
         - 💡ポイント行を最大2つ抽出
-        - 🎯メッセージを抽出
         - 🔗参考URLを抽出
         """
         result_lines = []
@@ -232,10 +224,6 @@ class MessageBuilder:
             # ポイントの箇条書き（最大2つ）
             elif line.startswith('- ') and len([l for l in result_lines if l.startswith('- ')]) < 2:
                 result_lines.append(line)
-            # 行動促進メッセージ
-            elif line.startswith('🎯'):
-                result_lines.append("")
-                result_lines.append(f"*{line}*")
             # 参考URL
             elif line.startswith('🔗'):
                 result_lines.append(line)

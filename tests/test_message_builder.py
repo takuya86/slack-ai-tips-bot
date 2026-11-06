@@ -54,6 +54,23 @@ def sections(blocks):
     return [b["text"]["text"] for b in blocks if b["type"] == "section"]
 
 
+class TestNoCallToAction(unittest.TestCase):
+    """情報を届ける形にするため、呼びかけ（💬 試したことある？・🎯 まずは〜）は出さない"""
+
+    def test_text_and_blocks_have_no_call_to_action(self):
+        mb = MessageBuilder()
+        text = mb.build("engineer", CURRENT_TIP, [article()])
+        blocks_text = "\n".join(all_texts(mb.build_blocks("engineer", CURRENT_TIP, [article()])))
+        for out in (text, blocks_text):
+            self.assertNotIn("試したことある", out)
+            self.assertNotIn("🎯", out)
+            self.assertIn("40%短縮", out)
+
+    def test_no_divider_without_articles(self):
+        blocks = MessageBuilder().build_blocks("engineer", CURRENT_TIP, [])
+        self.assertFalse(any(b["type"] == "divider" for b in blocks))
+
+
 class TestBuildBlocks(unittest.TestCase):
     def setUp(self):
         self.mb = MessageBuilder()
