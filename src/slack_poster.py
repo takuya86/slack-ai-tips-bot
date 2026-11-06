@@ -27,7 +27,7 @@ class SlackPoster:
         self.retry_count = retry_count
         self.retry_backoff_base = retry_backoff_base
 
-    def post(self, message: str) -> bool:
+    def post(self, message: str, blocks: Optional[list] = None) -> bool:
         """
         メッセージをSlackに投稿
 
@@ -36,16 +36,18 @@ class SlackPoster:
         - リトライ間隔: 1, 2, 4秒（指数バックオフ）
         - タイムアウト: 10秒
 
+        blocks の不備で 400（invalid_blocks）になったときは、text だけで1回送り直す
+
         Args:
-            message: 投稿するメッセージ（Markdown形式）
+            message: 投稿するメッセージ（Markdown形式。blocks があるときは通知の文面）
+            blocks: Block Kit の blocks（省略時は text だけ）
 
         Returns:
             成功: True, 失敗: False
         """
-        payload = {
-            "text": message,
-            "mrkdwn": True
-        }
+        payload = {"text": message}
+        if blocks:
+            payload["blocks"] = blocks
 
         for attempt in range(1, self.retry_count + 1):
             try:
@@ -69,8 +71,10 @@ class SlackPoster:
                         logger.info(f"Retrying in {wait_time}s... (attempt {attempt}/{self.retry_count})")
                         time.sleep(wait_time)
                         continue
-                    else:
-                        return False
+                    if blocks and response.status_code == 400 and "invalid_blocks" in response.text:
+                        logger.warning("Slack rejected blocks (invalid_blocks); resending as text only")
+                        return self.post(message)
+                    return False
 
             except requests.exceptions.Timeout:
                 logger.warning(f"Timeout on attempt {attempt}/{self.retry_count}")

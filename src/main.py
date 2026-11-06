@@ -4,9 +4,11 @@ GitHub Actionsから呼び出される
 """
 
 import argparse
+import json
 import logging
 import random
 import sys
+from urllib.parse import quote
 
 from config import Config
 from tips_selector import TipsSelector
@@ -105,12 +107,18 @@ def main():
         logger.info("Building message...")
         message_builder = MessageBuilder()
         message = message_builder.build(category, tip, articles, security_articles)
+        blocks = message_builder.build_blocks(category, tip, articles, security_articles)
 
         # 6. Slack投稿（または表示のみ）
         if args.dry_run:
             logger.info("=== DRY RUN MODE ===")
             print("\n" + "=" * 60)
             print(message)
+            print("=" * 60)
+            print("--- blocks ---")
+            print(json.dumps(blocks, ensure_ascii=False, indent=2))
+            print("--- Block Kit Builder ---")
+            print("https://app.slack.com/block-kit-builder/#" + quote(json.dumps({"blocks": blocks}, ensure_ascii=False), safe=""))
             print("=" * 60 + "\n")
             logger.info("Message would be posted to Slack (dry run)")
         else:
@@ -120,7 +128,7 @@ def main():
                 retry_count=Config.RETRY_COUNT,
                 retry_backoff_base=Config.RETRY_BACKOFF_BASE
             )
-            success = slack_poster.post(message)
+            success = slack_poster.post(message, blocks)
 
             if not success:
                 logger.error("Failed to post to Slack")
