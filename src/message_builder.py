@@ -21,7 +21,7 @@ class MessageBuilder:
     # 後方互換
     CATEGORY_LABELS = {k: v["label"] for k, v in CATEGORY_CONFIG.items()}
 
-    def build(self, category: str, tip: dict, articles: list) -> str:
+    def build(self, category: str, tip: dict, articles: list, security_articles: Optional[list] = None) -> str:
         """
         投稿メッセージを組み立て
 
@@ -70,6 +70,13 @@ class MessageBuilder:
             title_text = f"{top.title}（🇺🇸）" if top.lang == "en" else top.title
             lines.append(f"📰 {title_text}")
             lines.append(f"   {top.url}")
+
+        # --- AI 関連のセキュリティ記事（1件だけ） ---
+        if security_articles:
+            sec = security_articles[0]
+            sec_title = f"{sec.title}（🇺🇸）" if sec.lang == "en" else sec.title
+            lines.append(f"🔐 {sec_title}")
+            lines.append(f"   {sec.url}")
 
         return "\n".join(lines)
 

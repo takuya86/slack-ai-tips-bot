@@ -24,7 +24,6 @@ class Config:
 
     # 設定値
     RSS_FETCH_LIMIT: int = 3
-    RSS_TIMEOUT: int = 10
 
     # リトライ設定
     RETRY_COUNT: int = 3

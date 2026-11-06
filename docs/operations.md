@@ -135,6 +135,16 @@ bash scripts/tips-status-notify.sh --force-alert
 bash scripts/tips-auto-replenish.sh
 ```
 
+### RSSフィードの追加・停止
+
+フィードは `config/rss_feeds.yaml` で管理する（コードの変更は不要）。
+
+- 追加: 該当カテゴリ（`engineer` / `consultant` / `backoffice` / `common` / `security`）に `name` / `url` / `lang` を足す
+- 停止: その項目を削除するかコメントアウトする
+- `security` は 🔐 のセキュリティ記事枠。`settings.security_keywords` に合う AI 関連の記事だけが最大1件出る（配信枠ごとに候補をずらす）
+- 取得は1フィードずつ `settings.timeout_seconds`（5秒）で打ち切る。失敗したフィードは飛ばして配信は続く
+- 反映前の確認: 合成データで `python src/main.py --dry-run --category <カテゴリ>` を流し、ログの `Fetched N ... articles from <フィード名>` を見る
+
 ## トラブルシューティング
 
 ### 配信されない
